@@ -9,6 +9,8 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/VAOFactory.h>
+#include <unistd.h>
+
 Emitter::Emitter(int _numParticles, int _maxAlive)
 {
   m_particles.resize(_numParticles);
@@ -84,14 +86,15 @@ void Emitter::render() const
 
 void Emitter::update()
 {
+//    usleep(100000); // Delays the update for Debugging purposes.
 // dir += gravity * _dt * 0.5f
 //  pos += p.dir * _dt
-float _dt=0.1f;
-ngl::Vec3 gravity(0,-9.87, 0);
+float _dt=0.1f; // Delta Time
+ngl::Vec3 gravity(0,-9.87, 0); // Gravity
 static int numP =0;
 // choose number to birth
 // find first not alive and set as new particle
-int numberToBirth=100+ngl::Random::randomPositiveNumber(50);
+int numberToBirth=10+ngl::Random::randomPositiveNumber(150);
 
 for(int i=0; i<numberToBirth; ++i)
 {
@@ -111,13 +114,46 @@ for(int i=0; i<numberToBirth; ++i)
       p.pos += p.dir * _dt;
       p.size += 0.01f;
 
-      if (--p.life == 0 || p.pos.m_y <= 0.0)
+      if (--p.life <= 0 && p.pos.m_y <= -4.0)
       {
          createZeroParticle(p);
+      }
+
+      /// Create Boundary Box Collision
+      if (p.pos.m_y <= -4.0)
+      {
+          p.dir.set(p.dir.m_x,p.dir.m_y *= -1,p.dir.m_z);
+          p.life -= 10;
+      }
+      if (p.pos.m_x <= -100.0)
+      {
+          p.dir.set(p.dir.m_x *= -1,p.dir.m_y,p.dir.m_z);
+          p.life -= 10;
+      }
+      if (p.pos.m_x >= 100.0)
+      {
+          p.dir.set(p.dir.m_x *= -1,p.dir.m_y,p.dir.m_z);
+          p.life -= 10;
+      }
+      if (p.pos.m_z <= -100.0)
+      {
+          p.dir.set(p.dir.m_x,p.dir.m_y,p.dir.m_z *= -1);
+          p.life -= 10;
+      }
+      if (p.pos.m_z >= 100.0)
+      {
+          p.dir.set(p.dir.m_x,p.dir.m_y,p.dir.m_z *= -1);
+          p.life -= 10;
       }
     }
   }
 }
+
+void ResolveCollisions()
+{
+//    halfBoundsSize = boundsSize / 2 -
+}
+
 void Emitter::writeToGeo(std::string_view _fname)
 {
   std::cout<<"writing "<<_fname<<'\n';
