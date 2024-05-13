@@ -117,6 +117,7 @@ set up particle spheres of influence/ smoothing
 **inter particle interaction**
 
 Improve camera controls
+-- Made Field of View Adjustable
 
 Add user interaction with particles
 
