@@ -1,12 +1,15 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
 
+#include "ngl/Random.h"
 #include "NGLScene.h"
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/Util.h>
 #include <ngl/ShaderLib.h>
 #include <iostream>
+
+
 
 NGLScene::NGLScene()
 {
@@ -35,7 +38,7 @@ void NGLScene::initializeGL()
   // we must call that first before any other GL commands to load and link the
   // gl commands from the lib, if that is not done program will crash
   ngl::NGLInit::initialize();
-  glClearColor(0.7f, 0.7f, 0.7f, 1.0f);			   // Grey Background
+  glClearColor(0.4f, 0.35f, 0.3f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
   glEnable(GL_DEPTH_TEST);
   // enable multisampling for smoother drawing
@@ -43,7 +46,7 @@ void NGLScene::initializeGL()
   m_emmiter=std::make_unique<Emitter>(100000,50000);
   ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
   ngl::ShaderLib::use("ParticleShader");
-  m_view = ngl::lookAt({0,170,170},{0,0,0},{0,1,0});
+  m_view = ngl::lookAt({0,170,170},{0,50,0},{0,1,0});
 
 //  ngl::ShaderLib::use(ngl::nglColourShader);
 //  ngl::ShaderLib::setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
@@ -93,11 +96,20 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
       m_win.spinXFace=0;
       m_win.spinYFace=0;
       m_modelPos.set(ngl::Vec3::zero());
-
+  case Qt::Key_W :
+      m_view = ngl::lookAt({0,200,200},{0,50,0},{0,1,0});
+//  case Qt::Key_A :
+//      xVector = xVector - 10.0f;
+//  case Qt::Key_S :
+//      zVector = zVector - 10.0f;
+//  case Qt::Key_D :
+//      xVector = xVector + 10.0f;
+  case Qt::Key_R :
+      glClearColor(0,0,0,0);
   break;
   default : break;
   }
   // finally update the GLWindow and re-draw
-
+//    m_view = ngl::lookAt({0,170,170},{0,50,0},{0,1,0});
     update();
 }

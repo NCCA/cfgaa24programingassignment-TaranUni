@@ -39,6 +39,8 @@ void Emitter::createDefaultParticle(Particle &_p)
   _p.colour = ngl::Random::getRandomColour3();
   _p.life = static_cast<int>(2.0f+ngl::Random::randomPositiveNumber(150));
   _p.size= 0.01f;
+  _p.radius = 1;
+  _p.dist = 1;
   _p.isAlive = true;
 }
 
@@ -84,75 +86,194 @@ void Emitter::render() const
 //  }
 }
 
+//void Emitter::update()
+//{
+////    usleep(50000); // Delays the update for Debugging purposes.
+//float _dt=0.1f; // Delta Time
+//ngl::Vec3 gravity(0,-9.87, 0); // Gravity
+//static int numP =0;
+//bool collision = false;
+//
+//// choose number to birth
+//// find first not alive and set as new particle
+//int numberToBirth=10+ngl::Random::randomPositiveNumber(150);
+//
+//for(int i=0; i<numberToBirth; ++i)
+//{
+//  auto p = std::find_if(std::begin(m_particles),std::end(m_particles),
+//                        [](auto p)
+//                        {
+//                          return p.isAlive==false;
+//                        });
+//  createDefaultParticle(*p);
+//}
+//  for(auto &p : m_particles)
+//  {
+//    if (p.isAlive == true)
+//    {
+//      p.dir += gravity * _dt * 0.5;
+//      p.pos += p.dir * _dt;
+//      p.size += 0.01f;
+//
+//      /// Kill particle
+//      if (--p.life <= 0 && p.pos.m_y <= -4.0)
+//      {
+//         createZeroParticle(p);
+//      }
+//      /// Create Boundary Box Collision
+//      if (p.pos.m_y <= -4.0)
+//      {
+//          p.dir.set(p.dir.m_x,p.dir.m_y *= -1,p.dir.m_z);
+//      }
+//      if (p.pos.m_x <= -100.0)
+//      {
+//          p.dir.set(p.dir.m_x *= -1,p.dir.m_y,p.dir.m_z);
+//      }
+//      if (p.pos.m_x >= 100.0)
+//      {
+//          p.dir.set(p.dir.m_x *= -1,p.dir.m_y,p.dir.m_z);
+//      }
+//      if (p.pos.m_z <= -100.0)
+//      {
+//          p.dir.set(p.dir.m_x,p.dir.m_y,p.dir.m_z *= -1);
+//      }
+//      if (p.pos.m_z >= 100.0)
+//      {
+//          p.dir.set(p.dir.m_x,p.dir.m_y,p.dir.m_z *= -1);
+//      }
+//
+////      /// Inter-Particle collision handling
+////      if (bool collision == true)
+////      {
+////          p.dir.set(0,0,0);
+////      }
+//    }
+//  }
+//}
+
 void Emitter::update()
 {
-//    usleep(100000); // Delays the update for Debugging purposes.
-// dir += gravity * _dt * 0.5f
-//  pos += p.dir * _dt
-float _dt=0.1f; // Delta Time
-ngl::Vec3 gravity(0,-9.87, 0); // Gravity
-static int numP =0;
-// choose number to birth
-// find first not alive and set as new particle
-int numberToBirth=10+ngl::Random::randomPositiveNumber(150);
+    // Define necessary variables
+    float _dt = 0.1f; // Delta Time
+    ngl::Vec3 gravity(0, -9.87, 0); // Gravity
 
-for(int i=0; i<numberToBirth; ++i)
-{
-  auto p = std::find_if(std::begin(m_particles),std::end(m_particles),
-                        [](auto p)
-                        {
-                          return p.isAlive==false;
-                        });
-  createDefaultParticle(*p);
-}
+    // choose number to birth
+    // find first not alive and set as new particle
+    int numberToBirth = 10 + ngl::Random::randomPositiveNumber(10);
 
-  for(auto &p : m_particles)
-  {
-    if (p.isAlive == true)
+    for (int i = 0; i < numberToBirth; ++i)
     {
-      p.dir += gravity * _dt * 0.5;
-      p.pos += p.dir * _dt;
-      p.size += 0.01f;
-
-      if (--p.life <= 0 && p.pos.m_y <= -4.0)
-      {
-         createZeroParticle(p);
-      }
-
-      /// Create Boundary Box Collision
-      if (p.pos.m_y <= -4.0)
-      {
-          p.dir.set(p.dir.m_x,p.dir.m_y *= -1,p.dir.m_z);
-          p.life -= 10;
-      }
-      if (p.pos.m_x <= -100.0)
-      {
-          p.dir.set(p.dir.m_x *= -1,p.dir.m_y,p.dir.m_z);
-          p.life -= 10;
-      }
-      if (p.pos.m_x >= 100.0)
-      {
-          p.dir.set(p.dir.m_x *= -1,p.dir.m_y,p.dir.m_z);
-          p.life -= 10;
-      }
-      if (p.pos.m_z <= -100.0)
-      {
-          p.dir.set(p.dir.m_x,p.dir.m_y,p.dir.m_z *= -1);
-          p.life -= 10;
-      }
-      if (p.pos.m_z >= 100.0)
-      {
-          p.dir.set(p.dir.m_x,p.dir.m_y,p.dir.m_z *= -1);
-          p.life -= 10;
-      }
+        auto p = std::find_if(std::begin(m_particles), std::end(m_particles), [](auto p)
+        {
+            return p.isAlive == false;
+        });
+        createDefaultParticle(*p);
     }
-  }
+
+    // Vector to store particle indices and positions
+    std::vector<std::pair<size_t, ngl::Vec3>> particleIndicesAndPositions;
+
+    // Loop through each particle
+    for (size_t i = 0; i < m_particles.size(); ++i)
+    {
+        auto &p = m_particles[i];
+
+        if (p.isAlive == true)
+        {
+            // Apply gravity
+            p.dir += gravity * _dt * 0.5;
+
+            // Update position
+            p.pos += p.dir * _dt;
+            p.size += 1.0f;
+
+            // Kill particle if life ends and it reaches the bottom
+            if (--p.life <= 0 && p.pos.m_y <= -4.0)
+            {
+                createZeroParticle(p);
+            }
+
+            // Handle boundary collisions
+            handleBoundaryCollisions(p);
+
+            // Store particle index and position
+            particleIndicesAndPositions.push_back(std::make_pair(i, p.pos));
+        }
+    }
+
+    // Now all particle indices and positions stored in particleIndicesAndPositions vector
+    // Loop through this vector and compare positions to detect collisions
+    for (const auto &pair : particleIndicesAndPositions)
+    {
+        size_t index = pair.first;
+        ngl::Vec3 pos = pair.second;
+
+        // Loop through all particles to check for collisions with current particle
+        for (size_t i = 0; i < m_particles.size(); ++i)
+        {
+            if (i != index && m_particles[i].isAlive)
+            {
+                // Calculate distance between particles
+                float distSq = (pos - m_particles[i].pos).lengthSquared();
+
+                // If particles collide
+                if (distSq < (m_particles[index].size + m_particles[i].size) * (m_particles[index].size + m_particles[i].size))
+                {
+                    // Implement collision response
+                    // For simplicity I'm just reversing their velocities
+                    m_particles[index].dir = -m_particles[index].dir;
+                    m_particles[i].dir = -m_particles[i].dir;
+                }
+            }
+        }
+    }
 }
 
-void ResolveCollisions()
+
+void Emitter::handleBoundaryCollisions(Particle &p)
 {
-//    halfBoundsSize = boundsSize / 2 -
+    // Boundary conditions
+    if (p.pos.m_y <= -4.0)
+    {
+        p.dir.set(p.dir.m_x, p.dir.m_y *= -1, p.dir.m_z); // Reverse y direction
+    }
+    if (p.pos.m_x <= -100.0 || p.pos.m_x >= 100.0)
+    {
+        p.dir.set(p.dir.m_x *= -1, p.dir.m_y, p.dir.m_z); // Reverse x direction
+    }
+    if (p.pos.m_z <= -100.0 || p.pos.m_z >= 100.0)
+    {
+        p.dir.set(p.dir.m_x, p.dir.m_y, p.dir.m_z *= -1); // Reverse z direction
+    }
 }
+
+//void Emitter::handleParticleCollisions(Particle &p)
+//{
+//    // Loop through all particles to check for collisions with p
+//    for (auto &other : m_particles)
+//    {
+//        if (&p != &other && other.isAlive == true)
+//        {
+//            // Calculate distance between particles
+//            float distSq = (p.pos - other.pos).lengthSquared();
+//            int maxCollisionDistance = 1.0f;
+//
+//            // Check if particles are within the collision range
+//            if (distSq < maxCollisionDistance * maxCollisionDistance)
+//            {
+//                // If particles collide
+//                if (distSq < (p.size + other.size) * (p.size + other.size))
+//                {
+//                    // Implement collision response
+//                    // Here, you can adjust the direction or velocity of both particles
+//                    // For simplicity, let's just reverse their velocities
+//                    p.dir = -p.dir;
+//                    other.dir = -other.dir;
+//                }
+//            }
+//        }
+//    }
+//}
 
 void Emitter::writeToGeo(std::string_view _fname)
 {
@@ -184,10 +305,3 @@ void Emitter::writeToGeo(std::string_view _fname)
     file<<"beginExtra\nendExtra\n";
   }
 }
-
-
-
-
-
-
-

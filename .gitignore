@@ -1,5 +1,4 @@
 .idea
-*.o
 cmake-build*
 build/
 .vscode

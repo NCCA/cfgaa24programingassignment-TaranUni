@@ -7,8 +7,8 @@ struct Particle
 {
   Particle()=default;
 
-  Particle(ngl::Vec3 _pos, ngl::Vec3 _dir, int _life, float _size=0.1f, ngl::Vec3 _colour={1,1,1}) :
-      pos{_pos},dir{_dir},life{_life},size{_size},colour{_colour}
+  Particle(ngl::Vec3 _pos, ngl::Vec3 _dir, int _life, float _size=0.1f, ngl::Vec3 _colour={1,1,1},float _dist =1.0f , float _radius =10.0f) :
+      pos{_pos},dir{_dir},life{_life},size{_size},colour{_colour},radius{_radius}
       {
 
       }
@@ -16,9 +16,11 @@ struct Particle
   ngl::Vec3 pos;
   ngl::Vec3 dir;
   ngl::Vec3 colour;
+  float radius = 10.0f;
+  float dist = 1.0f;
   int life=100;
   float size=0.01f;
-  bool isAlive = false;
+  bool isAlive = false; // Note isAlive is not contained in the Constructor like the other parameters
 };
 
 
