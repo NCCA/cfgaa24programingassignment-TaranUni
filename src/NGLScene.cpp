@@ -43,10 +43,15 @@ void NGLScene::initializeGL()
   // enable multisampling for smoother drawing
   glEnable(GL_MULTISAMPLE);
   m_emmiter=std::make_unique<Emitter>(10000,10000);
+
+
+//    ngl::ShaderLib::createShaderProgram("ParticleShader");
   ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
-  ngl::ShaderLib::use("ParticleShader");
+//  ngl::ShaderLib::use("ParticleShader");
   ngl::ShaderLib::loadShader("ObjectShader","shaders/ObjectVertex.glsl","shaders/ObjectFragment.glsl");
-  ngl::ShaderLib::use("ObjectShader");
+//  ngl::ShaderLib::use("ObjectShader");
+//  ngl::ShaderLib::compileShader("ParticleShader");
+//  ngl::ShaderLib::compileShader("ObjectShader");
 
   m_CameraPosX = 0;
   m_CameraPosX = 170;
@@ -59,6 +64,7 @@ void NGLScene::initializeGL()
 //  ngl::ShaderLib::setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
 //  ngl::ShaderLib::setUniform("MVP",ngl::Mat4());
 //  ngl::VAOPrimitives::createSphere("sphere",10.0f,10);
+    ngl::ShaderLib::setUniform("MVP",m_project*m_view*m_mouseGlobalTX);
     ngl::VAOPrimitives::createDisk("disk", 0.8f, 120);
 //  ngl::VAOPrimitives::draw("sphere");
 
@@ -82,23 +88,32 @@ void NGLScene::loadMatricesToShader()
 
 void NGLScene::paintGL()
 {
-  // clear the screen and depth buffer
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glViewport(0,0,m_win.width,m_win.height);
-  auto  rotX = ngl::Mat4::rotateX(m_win.spinXFace);
-  auto  rotY = ngl::Mat4::rotateY(m_win.spinYFace);
-  auto mouseRotation = rotX * rotY;
-  mouseRotation.m_m[3][0] = m_modelPos.m_x;
-  mouseRotation.m_m[3][1] = m_modelPos.m_y;
-  mouseRotation.m_m[3][2] = m_modelPos.m_z;
+    // Clear the screen and depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, m_win.width, m_win.height);
 
-  ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
+    // Set up the view matrix
+    auto rotX = ngl::Mat4::rotateX(m_win.spinXFace);
+    auto rotY = ngl::Mat4::rotateY(m_win.spinYFace);
+    auto mouseRotation = rotX * rotY;
+    mouseRotation.m_m[3][0] = m_modelPos.m_x;
+    mouseRotation.m_m[3][1] = m_modelPos.m_y;
+    mouseRotation.m_m[3][2] = m_modelPos.m_z;
 
-  ngl::ShaderLib::use("ParticleShader");
-  ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
-  loadMatricesToShader();
-  ngl::VAOPrimitives::draw("mySphere");
-  m_emmiter->render();
+    // Set the MVP matrix for the particles
+    ngl::ShaderLib::use("ParticleShader");
+    ngl::ShaderLib::setUniform("MVP", m_project * m_view * mouseRotation);
+    m_emmiter->render();
+
+    // Set the MVP matrix for the sphere
+    m_transform.setPosition(-3.0f, 0.5f, -6.0f);
+    m_transform.setRotation(0.0f, 180.0f, 0.0f);
+    ngl::ShaderLib::use("ObjectShader"); // Assuming you have a shader for objects
+    loadMatricesToShader();
+    ngl::VAOPrimitives::draw("disk");
+
+    // Update the display
+    update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
