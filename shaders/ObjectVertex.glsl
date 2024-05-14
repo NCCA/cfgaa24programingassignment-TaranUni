@@ -9,9 +9,9 @@ void main()
 {
     gl_Position=MVP*vec4(inPos.xyz,1);
     gl_PointSize=inPos.w;
+    inColour = vec4(1.0f,1.0f,1.0f,1.0f);
     objectColour=inColour;
 //    objectColour=vec3(1,1,1);
-//    inColour = vec3(1,1,1);
 //
 //    objectColour = inColour;
 //

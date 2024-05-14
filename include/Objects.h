@@ -2,20 +2,21 @@
 #define CFGAAPROGRAMMINGASSIGNMENT_OBJECTS_H
 
 #include "ngl/Vec3.h"
+#include "ngl/Vec4.h"
 
-struct Particle
+struct Object
 {
-    Particle()=default;
+    Object()=default;
 
-    Particle(ngl::Vec3 _pos, ngl::Vec3 _dir, float _size=0.1f, ngl::Vec3 _colour={1,1,1}) :
-            pos{_pos},dir{_dir},size{_size},colour{_colour}
+    Object(ngl::Vec3 _pos, ngl::Vec3 _dir, float _size=0.1f) :
+            pos{_pos},dir{_dir},size{_size}
     {
 
     }
 
     ngl::Vec3 pos;
     ngl::Vec3 dir;
-    ngl::Vec3 colour;
+    ngl::Vec4 colour;
     float size=0.1f;
 };
 
