@@ -1,9 +1,9 @@
 #version 410 core
 
-layout (location=0) out vec4 fragColour;
+out vec4 fragColour;
 in vec3 objectColour;
 
 void main()
 {
-    fragColour.rgb=vec3(1,1,1);
+    fragColour=vec4(1.0f,1.0f,1.0f,1.0f);
 }

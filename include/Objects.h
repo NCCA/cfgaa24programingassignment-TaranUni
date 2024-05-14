@@ -1,9 +1,22 @@
 #ifndef CFGAAPROGRAMMINGASSIGNMENT_OBJECTS_H
 #define CFGAAPROGRAMMINGASSIGNMENT_OBJECTS_H
-#include <ngl/Mat4.h>
-#include <ngl/Transformation.h>
-#include "WindowParams.h"
-#include <QOpenGLWindow>
-#include <memory>
+
+#include "ngl/Vec3.h"
+
+struct Particle
+{
+    Particle()=default;
+
+    Particle(ngl::Vec3 _pos, ngl::Vec3 _dir, float _size=0.1f, ngl::Vec3 _colour={1,1,1}) :
+            pos{_pos},dir{_dir},size{_size},colour{_colour}
+    {
+
+    }
+
+    ngl::Vec3 pos;
+    ngl::Vec3 dir;
+    ngl::Vec3 colour;
+    float size=0.1f;
+};
 
 #endif //CFGAAPROGRAMMINGASSIGNMENT_OBJECTS_H
