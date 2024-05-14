@@ -38,7 +38,8 @@ set(CMAKE_CXX_EXTENSIONS ON)
 # Set the name of the executable we want to build
 add_executable(${TargetName}
         include/Disc.h
-        include/Disc.h)
+        include/Disc.h
+        include/Objects.h)
 
 # Add NGL include path
 include_directories(include $ENV{HOME}/NGL/include)

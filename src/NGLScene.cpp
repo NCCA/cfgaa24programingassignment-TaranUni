@@ -45,6 +45,9 @@ void NGLScene::initializeGL()
   m_emmiter=std::make_unique<Emitter>(10000,10000);
   ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
   ngl::ShaderLib::use("ParticleShader");
+  ngl::ShaderLib::loadShader("ObjectShader","shaders/ObjectVertex.glsl","shaders/ObjectFragment.glsl");
+  ngl::ShaderLib::use("ObjectShader");
+
   m_CameraPosX = 0;
   m_CameraPosX = 170;
   m_CameraPosX = 170;
@@ -56,6 +59,7 @@ void NGLScene::initializeGL()
 //  ngl::ShaderLib::setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
 //  ngl::ShaderLib::setUniform("MVP",ngl::Mat4());
 //  ngl::VAOPrimitives::createSphere("sphere",10.0f,10);
+    ngl::VAOPrimitives::createDisk("disk", 0.8f, 120);
 //  ngl::VAOPrimitives::draw("sphere");
 
   m_win.FoV = 90.0f;
@@ -69,6 +73,13 @@ void NGLScene::timerEvent(QTimerEvent *_event)
     update();
 }
 
+void NGLScene::loadMatricesToShader()
+{
+    ngl::Mat4 MVP = m_project * m_view * m_mouseGlobalTX * m_transform.getMatrix();
+
+    ngl::ShaderLib::setUniform("MVP", MVP);
+}
+
 void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
@@ -78,10 +89,14 @@ void NGLScene::paintGL()
   auto  rotY = ngl::Mat4::rotateY(m_win.spinYFace);
   auto mouseRotation = rotX * rotY;
   mouseRotation.m_m[3][0] = m_modelPos.m_x;
-  mouseRotation.m_m[3][0] = m_modelPos.m_y;
-  mouseRotation.m_m[3][0] = m_modelPos.m_z;
+  mouseRotation.m_m[3][1] = m_modelPos.m_y;
+  mouseRotation.m_m[3][2] = m_modelPos.m_z;
 
   ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
+
+  ngl::ShaderLib::use("ParticleShader");
+  ngl::ShaderLib::setUniform("MVP",m_project*m_view*mouseRotation);
+  loadMatricesToShader();
   ngl::VAOPrimitives::draw("mySphere");
   m_emmiter->render();
 }

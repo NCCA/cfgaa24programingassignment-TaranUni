@@ -112,6 +112,7 @@ for(int i=0; i<numberToBirth; ++i)
   {
     if (p.isAlive == true)
     {
+        ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
         p.colour -= ngl::Vec3(0.0f,0.0f,0.05f);
         if (p.colour.m_z < 0)
         {

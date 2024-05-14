@@ -9,5 +9,5 @@ uniform mat4 MVP;
 void main()
 {
     gl_Position=MVP*vec4(inPos,1);
-    particleColour=vec3(3,3,3);
+    particleColour=inColour;
 }
