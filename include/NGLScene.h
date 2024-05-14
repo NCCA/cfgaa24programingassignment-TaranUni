@@ -41,6 +41,7 @@ class NGLScene : public QOpenGLWindow
     /// @brief this is called everytime we want to draw the scene
     //----------------------------------------------------------------------------------------------------------------------
     void paintGL() override;
+    void updateViewMatrix();
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief this is called everytime we resize the window
     //----------------------------------------------------------------------------------------------------------------------
@@ -86,6 +87,12 @@ private:
     std::unique_ptr<Emitter> m_emmiter;
     ngl::Mat4 m_view;
     ngl::Mat4 m_project;
+
+    int m_CameraPosX;
+    int m_CameraPosY;
+    int m_CameraPosZ;
+    ngl::Vec3 m_CameraPosition;
+    ngl::Vec3 m_Centre;
 
 };
 

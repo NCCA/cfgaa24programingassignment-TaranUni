@@ -81,15 +81,14 @@ void NGLScene::mouseReleaseEvent(QMouseEvent *_event)
 //----------------------------------------------------------------------------------------------------------------------
 void NGLScene::wheelEvent(QWheelEvent *_event)
 {
-
   // check the diff of the wheel position (0 means no change)
-  if (_event->angleDelta().y() > 0)
+  if (_event->angleDelta().y() > 5.0f)
   {
-    m_modelPos.m_z += ZOOM;
+    m_modelPos.m_z += 10;
   }
-  else if (_event->angleDelta().y() < 0)
+  else if (_event->angleDelta().y() < 5.0f)
   {
-    m_modelPos.m_z -= ZOOM;
+    m_modelPos.m_z -= 10;
   }
   update();
 }
