@@ -121,15 +121,23 @@ for(int i=0; i<numberToBirth; ++i)
         {
             p.colour -= ngl::Vec3(0.01f,0.0f,0.0f);
         }
-        if (p.pos.m_x > 5)
+        if (p.pos.m_x > 10)
         {
-
+            p.dir += ngl::Vec3(1,0,0);
         }
-        if (p.pos.m_y > 5)
+        if (p.pos.m_x < -10)
         {
-
+            p.dir -= ngl::Vec3(1,0,0);
         }
-        p.dir += gravity * _dt * 0.5 * p.randomness;
+        if (p.pos.m_z > 10)
+        {
+            p.dir += ngl::Vec3(0,0,1);
+        }
+        if (p.pos.m_z < -10)
+        {
+            p.dir -= ngl::Vec3(0,0,10);
+        }
+        p.dir += gravity * _dt * 0.5 / p.randomness;
         p.pos += p.dir * _dt;
         p.size -= 0.1f;
         /// Kill particle

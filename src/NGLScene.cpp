@@ -55,7 +55,7 @@ void NGLScene::initializeGL()
 //  ngl::ShaderLib::use(ngl::nglColourShader);
 //  ngl::ShaderLib::setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
 //  ngl::ShaderLib::setUniform("MVP",ngl::Mat4());
-  ngl::VAOPrimitives::createSphere("sphere",10.0f,10);
+//  ngl::VAOPrimitives::createSphere("sphere",10.0f,10);
 //  ngl::VAOPrimitives::draw("sphere");
 
   m_win.FoV = 90.0f;
