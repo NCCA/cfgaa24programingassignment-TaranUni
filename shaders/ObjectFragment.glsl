@@ -1,9 +1,11 @@
 #version 410 core
 
-out vec4 fragColour;
-in vec3 objectColour;
+layout (location =0) out vec4 fragColour;
+
+in vec3 worldPos;
+in vec3 normal;
 
 void main()
 {
-    fragColour=vec4(1.0f,1.0f,1.0f,1.0f);
+    fragColour=vec4(0.3f,0.2f,0.1f,1.0f);
 }
