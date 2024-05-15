@@ -39,7 +39,6 @@ void Emitter::createDefaultParticle(Particle &_p)
   _p.colour = ngl::Vec3(1.0f,1.0f,1.0f);
   _p.life = static_cast<int>(2.0f+ngl::Random::randomPositiveNumber(150));
   _p.size= 0.1f;
-  _p.randy = ngl::Vec3(0,0,0);
   _p.randomness = 5;
   _p.isAlive = true;
 }
@@ -86,11 +85,54 @@ void Emitter::render() const
 //  }
 }
 
+void Emitter::initializeGrid(int sizeX, int sizeY, int sizeZ, float cellSize)
+{
+    m_gridSizeX = sizeX;
+    m_gridSizeY = sizeY;
+    m_gridSizeZ = sizeZ;
+    m_cellSize = cellSize;
+
+    m_grid.resize(m_gridSizeX);
+    for (int x = 0; x < m_gridSizeX; ++x)
+    {
+        m_grid[x].resize(m_gridSizeY);
+        for (int y = 0; y < m_gridSizeY; ++y)
+        {
+            m_grid[x][y].resize(m_gridSizeZ);
+        }
+    }
+}
+
+void Emitter::indexParticleInGrid(Particle& p)
+{
+    int x = static_cast<int>((p.pos.m_x + m_gridSizeX * m_cellSize / 2) / m_cellSize);
+    int y = static_cast<int>((p.pos.m_y + m_gridSizeY * m_cellSize / 2) / m_cellSize);
+    int z = static_cast<int>((p.pos.m_z + m_gridSizeZ * m_cellSize / 2) / m_cellSize);
+
+    // Ensure particle is within grid bounds
+    if (x >= 0 && x < m_gridSizeX && y >= 0 && y < m_gridSizeY && z >= 0 && z < m_gridSizeZ)
+    {
+        m_grid[x][y][z].particles.push_back(&p);
+    }
+}
+
 void Emitter::update()
 {
+    // Clear the grid
+    for (auto& plane : m_grid)
+    {
+        for (auto& row : plane)
+        {
+            for (auto& cell : row)
+            {
+                cell.particles.clear();
+            }
+        }
+    }
+
 //    usleep(50000); // Delays the update for Debugging purposes.
 float _dt=0.1f; // Delta Time
-ngl::Vec3 gravity(0,9.87, 0); // Gravity
+ngl::Vec3 gravity(0,-9.87, 0); // Gravity
 ngl::Vec3 random(0,0, 0); // random direction vector
 static int numP =0;
 bool collision = false;
@@ -112,7 +154,7 @@ for(int i=0; i<numberToBirth; ++i)
   {
     if (p.isAlive == true)
     {
-        ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
+//        ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
         p.colour -= ngl::Vec3(0.0f,0.0f,0.05f);
         if (p.colour.m_z < 0)
         {
@@ -122,23 +164,27 @@ for(int i=0; i<numberToBirth; ++i)
         {
             p.colour -= ngl::Vec3(0.01f,0.0f,0.0f);
         }
-        if (p.pos.m_x > 10)
-        {
-            p.dir += ngl::Vec3(1,0,0);
-        }
-        if (p.pos.m_x < -10)
-        {
-            p.dir -= ngl::Vec3(1,0,0);
-        }
-        if (p.pos.m_z > 10)
-        {
-            p.dir += ngl::Vec3(0,0,1);
-        }
-        if (p.pos.m_z < -10)
-        {
-            p.dir -= ngl::Vec3(0,0,10);
-        }
-        p.dir += gravity * _dt * 0.5 / p.randomness;
+
+//        /// Redirects points to center
+//        if (p.pos.m_x > 10)
+//        {
+//            p.dir += ngl::Vec3(1,0,0);
+//        }
+//        if (p.pos.m_x < -10)
+//        {
+//            p.dir -= ngl::Vec3(1,0,0);
+//        }
+//        if (p.pos.m_z > 10)
+//        {
+//            p.dir += ngl::Vec3(0,0,1);
+//        }
+//        if (p.pos.m_z < -10)
+//        {
+//            p.dir -= ngl::Vec3(0,0,10);
+//        }
+
+//        p.dir += gravity * _dt * 0.5 / p.randomness; // for campfire
+        p.dir += gravity * _dt * 0.5; // for fluid
         p.pos += p.dir * _dt;
         p.size -= 0.1f;
         /// Kill particle
