@@ -59,7 +59,7 @@ void Emitter::render() const
 {
 //  ngl::Mat4 look=ngl::lookAt({0,150,150},{0,0,0},{0,1,0});
 //  ngl::Mat4 persp=ngl::perspective(45.0f,1.0,0.1,200);
-//  glPointSize(10);
+  glPointSize(10);
 //  ngl::ShaderLib::setUniform("MVP", persp*look);
   m_vao ->bind();
   {
@@ -154,7 +154,7 @@ for(int i=0; i<numberToBirth; ++i)
   {
     if (p.isAlive == true)
     {
-//        ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
+        ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
         p.colour -= ngl::Vec3(0.0f,0.0f,0.05f);
         if (p.colour.m_z < 0)
         {
@@ -197,6 +197,12 @@ for(int i=0; i<numberToBirth; ++i)
       handleBoundaryCollisions(p);
     }
   }
+}
+
+// Returns the color of the Tetromino.
+ngl::Vec4 Particle::getColour() const
+{
+    return ngl::Vec4(colour,1.0f);
 }
 
 void Emitter::handleBoundaryCollisions(Particle &p)

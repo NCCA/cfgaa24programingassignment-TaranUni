@@ -16,6 +16,7 @@ struct Particle
   ngl::Vec3 pos;
   ngl::Vec3 dir;
   ngl::Vec3 colour;
+  ngl::Vec4 getColour() const;
   float randomness = 5;
   int life=100;
   float size=0.1f;

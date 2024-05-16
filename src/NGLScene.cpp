@@ -5,6 +5,7 @@
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
+#include <QPainter>
 #include <iostream>
 
 NGLScene::NGLScene()
@@ -84,7 +85,7 @@ void NGLScene::initializeGL()
     // be done once we have a valid GL context but before we call any GL commands. If we dont do
     // this everything will crash
     ngl::NGLInit::initialize();
-    glClearColor(0.4f, 0.4f, 0.4f, 1.0f); // Grey Background
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Grey Background
     // enable depth testing for drawing
     glEnable(GL_DEPTH_TEST);
     m_lightAngle = 0.0;
@@ -128,12 +129,12 @@ void NGLScene::initializeGL()
 
     ngl::ShaderLib::setUniform("camPos", from);
     // now a light
-    m_lightPos.set(0.0, 2.0f, 2.0f, 1.0f);
+    m_lightPos.set(0.0, 20.0f, 20.0f, 1.0f);
     // setup the default shader material and light porerties
     // these are "uniform" so will retain their values
     ngl::ShaderLib::setUniform("lightPosition", m_lightPos.toVec3());
-    ngl::ShaderLib::setUniform("lightColor", 1000.0f, 1000.0f, 1000.0f);
-    ngl::ShaderLib::setUniform("exposure", 8.2f);
+    ngl::ShaderLib::setUniform("lightColor", 100.0f, 100.0f, 100.0f);
+    ngl::ShaderLib::setUniform("exposure", 4.0f);
     ngl::ShaderLib::setUniform("albedo", 0.950f, 0.71f, 0.29f);
 
     ngl::ShaderLib::setUniform("metallic", 1.02f);
@@ -222,7 +223,8 @@ void NGLScene::drawScene(const std::string &_shader)
 
     m_transform.reset();
     {
-        m_transform.setPosition(0.0f, -10.0f, 0.0f);
+        ngl::ShaderLib::use("PBR");
+        m_transform.setPosition(0.0f, -40.0f, 0.0f);
         m_transform.setRotation(90.0f, 0.0f, 0.0f);
         loadMatricesToShader();
         ngl::VAOPrimitives::draw("disk");
@@ -230,10 +232,16 @@ void NGLScene::drawScene(const std::string &_shader)
 
     m_transform.reset();
     {
-//        ngl::ShaderLib::use("ParticleShader");
+
         loadMatricesToShader();
         m_emmiter->render();
     } // and before a pop
+
+    QPainter painter(this);
+    painter.setPen(Qt::blue);
+    painter.setFont(QFont("Times New Roman", 15));
+    painter.drawText(QRect(50, -50, width(), height()), Qt::AlignLeft + Qt::AlignBottom, "Scroll: Zoom \n Left-Click hold: Tumble Scene \n Right-Click hold: Shift Scene ");
+
 }
 
 //void NGLScene::paintGL()
@@ -246,13 +254,24 @@ void NGLScene::drawScene(const std::string &_shader)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------------------------------------------------
 
 void NGLScene::paintGL()
 {
     // clear the screen and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, m_win.width, m_win.height);
-    drawScene("PBR");
+
+    if (m_showDisk)
+    {
+        // Draw scene with PBR shader
+        drawScene("PBR");
+    }
+    if (m_showParticles)
+    {
+        // Draw scene with particleShader
+        drawScene("ParticleShader");
+    }
 }
 
 //

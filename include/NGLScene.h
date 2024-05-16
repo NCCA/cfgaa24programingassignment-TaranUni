@@ -132,6 +132,11 @@ private:
     /// @param[in] _shader the name of the shader to use when drawing
     //----------------------------------------------------------------------------------------------------------------------
     void drawScene(const std::string &_shader);
+
+    bool m_showDisk;
+
+    bool m_showParticles;
+
 };
 
 
