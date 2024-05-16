@@ -1,4 +1,5 @@
 #include "Emitter.h"
+#include "Particle.h"
 #include "ngl/Random.h"
 #include <fmt/format.h>
 #include <iostream>
@@ -9,6 +10,8 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/VAOFactory.h>
+#include <ngl/Vec3.h>
+#include <ngl/Vec4.h>
 #include <unistd.h>
 
 Emitter::Emitter(int _numParticles, int _maxAlive)
@@ -26,6 +29,7 @@ void Emitter::createZeroParticle(Particle &_p)
 {
   _p.pos.set(0.0f,0.0f,0.0f);
   _p.size=0.1f;
+  _p.colour= ngl::Vec3(0,0,0);
   _p.dir.set(0,0,0);
   _p.isAlive = false;
 }
@@ -37,9 +41,8 @@ void Emitter::createDefaultParticle(Particle &_p)
   _p.dir=m_emitDir * ngl::Random::randomPositiveNumber() + randomVectorOnSphere() * m_spread;
   _p.dir.m_y = std::abs(_p.dir.m_y);
   _p.colour = ngl::Vec3(1.0f,1.0f,1.0f);
-  _p.life = static_cast<int>(2.0f+ngl::Random::randomPositiveNumber(150));
+  _p.life = static_cast<int>(2.0f+ngl::Random::randomPositiveNumber(3000));
   _p.size= 0.1f;
-  _p.randomness = 5;
   _p.isAlive = true;
 }
 
@@ -58,7 +61,7 @@ ngl::Vec3 Emitter::randomVectorOnSphere()
 ///*
 void Emitter::render() const
 {
-    glPointSize(10);
+    glPointSize(3);
 
     // Bind the VAO
     m_vao->bind();
@@ -67,13 +70,10 @@ void Emitter::render() const
         m_vao->setData(ngl::AbstractVAO::VertexData(m_particles.size() * sizeof(Particle), m_particles[0].pos.m_x));
 
         // Position attribute
-        m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(Particle),0);
+        m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(Particle),0); // inPos
 
         // Color attribute (assuming it starts at offset 6 in Particle)
-        m_vao->setVertexAttributePointer(1, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, colour));
-
-        // Size attribute (assuming it starts at offset 12 in Particle)
-        m_vao->setVertexAttributePointer(2, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, size));
+        m_vao->setVertexAttributePointer(1, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, colour)); // inColour
 
         // Set the number of indices
         m_vao->setNumIndices(m_particles.size());
@@ -131,15 +131,16 @@ void Emitter::update()
         }
     }
 
+    /// Randomizes particles birthed
     int numberToBirth=10+ngl::Random::randomPositiveNumber(10);
 
+    /// This generates the particles until it has run through numberToBirth
     for(int i=0; i<numberToBirth; ++i)
     {
-        auto p = std::find_if(std::begin(m_particles),std::end(m_particles),
-                              [](auto p)
-                              {
-                                  return p.isAlive==false;
-                              });
+        auto p = std::find_if(std::begin(m_particles),std::end(m_particles),[](auto p)
+        {
+            return p.isAlive==false;
+        });
         createDefaultParticle(*p);
     }
 
@@ -152,32 +153,23 @@ void Emitter::update()
     {
         if (p.isAlive)
         {
-            ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
-            p.colour -= ngl::Vec3(0.0f,0.0f,0.05f);
-            if (p.colour.m_z < 0)
-            {
-                p.colour -= ngl::Vec3(0.0f,0.02f,0.0f);
-            }
-            if (p.colour.m_y < 0)
-            {
-                p.colour -= ngl::Vec3(0.01f,0.0f,0.0f);
-            }
 
-//            p.dir += gravity * _dt * 0.5 / p.randomness; // for campfire
-            p.dir += gravity * _dt * 0.5; // for fluid
+            p.colour -= ngl::Vec3(0.0f,0.0f,0.001f);
+
+            p.dir += gravity * _dt * 0.5 + m_direction; // for fluid
             p.pos += p.dir * _dt;
-            p.size -= 0.1f;
+//            p.life -= 0.0001f; // Lowers life of particle
             /// Kill particle
-            if (--p.life <= 0 && p.pos.m_y >= 200.0)
+            if (--p.life <= 0)
             {
-                createZeroParticle(p);
-                p.isAlive = false;
+//                createZeroParticle(p);
+//                p.isAlive = false;
             }
             /// Create Boundary Box Collision
             handleBoundaryCollisions(p);
 
             // Index particle in the grid
-//            indexParticleInGrid(p);
+            indexParticleInGrid(p);
         }
     }
 
@@ -234,14 +226,13 @@ ngl::Vec3 normalized(const ngl::Vec3 &v)
 
 void Emitter::handleParticleCollision(Particle &particleA, Particle &particleB)
 {
-    particleA.colour = ngl::Vec3(1.0f,1.0f,1.0f);
-
     // Calculate the distance between the two particles
     ngl::Vec3 displacement = particleA.pos - particleB.pos;
     float distance = displacement.length();
 
     // If the distance is less than a threshold (e.g., sum of radii), they collide
-    float collisionThreshold = particleA.size + particleB.size;
+    float collisionThreshold = particleA.size + particleB.size + 2; // the extra two allows it to be more easily visible by spacing out particles more
+    /// Essentially their hit "boxes" (radius) is larger than the rendered particle
     if (distance < collisionThreshold)
     {
         // Handle collision effects (e.g., bounce off, merge, etc.)
@@ -258,26 +249,22 @@ void Emitter::handleParticleCollision(Particle &particleA, Particle &particleB)
             particleB.dir -= 2 * relativeSpeed * collisionNormal;
         }
     }
+    m_direction = particleA.dir;
 }
 
-// Returns the color of the Particle.
-ngl::Vec4 Particle::getColour() const
-{
-    return ngl::Vec4(colour,1.0f);
-}
 
 void Emitter::handleBoundaryCollisions(Particle &p)
 {
     // Boundary conditions
-    if (p.pos.m_y <= -4.0)
+    if (p.pos.m_y <= -0.0 || p.pos.m_y >= 100.0) // The top and bottom
     {
-        p.dir.set(p.dir.m_x, p.dir.m_y *= -1, p.dir.m_z); // Reverse y direction
+        p.dir.set(p.dir.m_x,p.dir.m_y = 1+(p.dir.m_y -= (2 * p.dir.m_y)), p.dir.m_z); // Reverse y direction
     }
-    if (p.pos.m_x <= -100.0 || p.pos.m_x >= 100.0)
+    if (p.pos.m_x <= -50.0 || p.pos.m_x >= 50.0)
     {
         p.dir.set(p.dir.m_x *= -1, p.dir.m_y, p.dir.m_z); // Reverse x direction
     }
-    if (p.pos.m_z <= -100.0 || p.pos.m_z >= 100.0)
+    if (p.pos.m_z <= -50.0 || p.pos.m_z >= 50.0)
     {
         p.dir.set(p.dir.m_x, p.dir.m_y, p.dir.m_z *= -1); // Reverse z direction
     }

@@ -2,6 +2,7 @@
 #define PARTICLE_H_
 
 #include "ngl/Vec3.h"
+#include "ngl/Vec4.h"
 
 struct Particle
 {
@@ -16,12 +17,16 @@ struct Particle
   ngl::Vec3 pos;
   ngl::Vec3 dir;
   ngl::Vec3 colour;
-  ngl::Vec4 getColour() const;
-  float randomness = 5;
+
   int life=100;
-  float size=0.1f;
+  float size=0.1f; // Defunct
   bool isAlive = false; // Note isAlive is not contained in the Constructor like the other parameters
 };
 
+//// Implementation of setColour method
+//void Particle::setColour(const ngl::Vec4 &colour)
+//{
+//    this->colour = ngl::Vec3(colour.m_x, colour.m_y, colour.m_z);
+//}
 
 #endif

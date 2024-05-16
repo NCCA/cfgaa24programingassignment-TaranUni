@@ -31,17 +31,19 @@ private :
 
   std::vector<Particle> m_particles;
   ngl::Vec3 m_position={0,0,0};
-  float m_spread = 15.0f; // how far particles are ejected
-  ngl::Vec3 m_emitDir = {0,20.0f,0};
+  float m_spread = 5.0f; // how far particles are ejected
+  ngl::Vec3 m_emitDir = {0,0.0f,0};
   int m_maxAlive;
   std::unique_ptr<ngl::AbstractVAO> m_vao;
+
+  ngl::Vec3 m_direction;
 
   std::vector<std::vector<std::vector<GridCell>>> m_grid;
   int m_gridSizeX;
   int m_gridSizeY;
   int m_gridSizeZ;
   float m_cellSize;
-  static constexpr int NEIGHBOR_RADIUS = 2;
+  int NEIGHBOR_RADIUS = 2;
 
   void initializeGrid(int sizeX, int sizeY, int sizeZ, float cellSize);
   void indexParticleInGrid(Particle& p);

@@ -11,7 +11,7 @@
 NGLScene::NGLScene()
 {
   // re-size the widget to that of the parent (in this case the GLFrame passed in on construction)
-  setTitle("Campfire Scene or fluid sim IDK right now");
+  setTitle("Fluid Sim");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -34,48 +34,6 @@ void NGLScene::resizeGL(int _w , int _h)
 
 //constexpr auto shaderProgram = "ObjectShader";
 constexpr auto shaderProgram = "PBR";
-
-//----------------------------------------------------------------------------------------------------------------------
-
-//void NGLScene::initializeGL()
-//{
-//  // we must call that first before any other GL commands to load and link the
-//  // gl commands from the lib, if that is not done program will crash
-//  ngl::NGLInit::initialize();
-//  glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
-//  // enable depth testing for drawing
-//  glEnable(GL_DEPTH_TEST);
-//  // enable multisampling for smoother drawing
-//  glEnable(GL_MULTISAMPLE);
-//  m_emmiter=std::make_unique<Emitter>(10000,10000);
-//
-//    ngl::ShaderLib::loadShader("shaderProgram","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
-////  ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
-////  ngl::ShaderLib::loadShader("ObjectShader","shaders/ObjectVertex.glsl","shaders/ObjectFragment.glsl");
-////  ngl::ShaderLib::use("ObjectShader");
-//
-////  m_CameraPosition = ngl::Vec3(0,170,170);
-////  m_Centre = ngl::Vec3(0,50,0);
-//
-//    // We now create our view matrix for a static camera
-//    ngl::Vec3 from(0.0f, 2.0f, 10.0f);
-//    ngl::Vec3 to(0.0f, 0.0f, 0.0f);
-//    ngl::Vec3 up(0.0f, 1.0f, 0.0f);
-//    // now load to our new camera
-//    m_view = ngl::lookAt(from, to, up);
-////  m_view = ngl::lookAt({0,170,170},{0,50,0},{0,1,0});
-//
-////  ngl::ShaderLib::use(ngl::nglColourShader);
-////  ngl::ShaderLib::setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
-////  ngl::ShaderLib::setUniform("MVP",ngl::Mat4());
-////    ngl::ShaderLib::setUniform("MVP",m_project*m_view*m_mouseGlobalTX);
-//    ngl::VAOPrimitives::createDisk("disk", 300.0f, 120);
-////    ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
-//
-//  m_win.FoV = 90.0f;
-//
-//  startTimer(10);
-//}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -253,25 +211,6 @@ void NGLScene::drawScene(const std::string &_shader)
         m_emmiter->render();
     }
 
-//    m_transform.reset();
-//    {
-//        ngl::ShaderLib::setUniform("lightColor", 40000.0f, 40000.0f, 40000.0f);
-//        ngl::ShaderLib::use("PBR");
-//        m_transform.setPosition(0.0f, -200.0f, 0.0f);
-//        m_transform.setRotation(90.0f, 0.0f, 0.0f);
-//        m_showPBR = true;
-//        loadMatricesToShader();
-//        ngl::VAOPrimitives::draw("disk");
-//    } // and before a pop
-//
-//    m_transform.reset();
-//    {
-//        ngl::ShaderLib::use("ParticleShader");
-//        m_showParticles = true;
-//        loadMatricesToShader();
-//        m_emmiter->render();
-//    } // and before a pop
-
     QPainter painter(this);
     painter.setPen(Qt::blue);
     painter.setFont(QFont("Times New Roman", 15));
@@ -280,7 +219,6 @@ void NGLScene::drawScene(const std::string &_shader)
                                                                                          "Right-Click hold: Shift Scene \n"
                                                                                          "Space: Reset camera \n"
                                                                                          "ESC: Exit program");
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------
