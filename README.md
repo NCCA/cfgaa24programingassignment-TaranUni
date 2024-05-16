@@ -20,12 +20,15 @@ I will also just stick with showing just the smoke view.~~
 
 ### Particle Based Fluid Sim
 
-~~After some thinking and looking through the Euler method, I think I will switch to using the particle based method instead as we have been working on something similar in workshops.
-I have decided to use this video as referance [Sebastian Lague](https://www.youtube.com/watch?v=rSKMYc1CQHE&) on how to create a realistic particle based fluid sim. I think this method will be easier to implement with current code.~~
+After some thinking and looking through the Euler method, I think I will switch to using the particle based method instead as we have been working on something similar in workshops.
+I have decided to use this video as referance [Sebastian Lague](https://www.youtube.com/watch?v=rSKMYc1CQHE&) on how to create a realistic particle based fluid sim. I think this method will be easier to implement with current code.
 
+I found it hard to use Sebastian Lagues video to implement the optimization step as I found some parts had explanations which made the problem seem more confusing than it was, for instance the collision radius effect 
+
+
+### ~~**Fire VFX** I am now just using the particles for this.~~
 I gave up on the fluid sim due to time constraints and complexity in optimising the code.
 
-**Fire VFX** I am now just using the particles for this.
 
 #### Old Collision code
 ```C++
@@ -147,7 +150,7 @@ The Particle data structure is stored in "Particle.h" as part of a struct. This 
 
 The Emmiters parameters and functions are stored in "Emmiter.h" as part of a class.
 
-## How the program will flow
+## How the program flows
 The program starts with Main.cpp then opens NGLScene (this is where the main code loop occurs).
 
 In NGLScene the window is set to grey the light's attributes are set, the emmiter and 
