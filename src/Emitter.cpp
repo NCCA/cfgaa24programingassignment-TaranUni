@@ -68,13 +68,12 @@ void Emitter::render() const
 
         // Position attribute
         m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(Particle),0);
-        m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(Particle),6);
 
         // Color attribute (assuming it starts at offset 6 in Particle)
-        m_vao->setVertexAttributePointer(2, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, colour));
+        m_vao->setVertexAttributePointer(1, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, colour));
 
         // Size attribute (assuming it starts at offset 12 in Particle)
-        m_vao->setVertexAttributePointer(3, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, size));
+        m_vao->setVertexAttributePointer(2, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, size));
 
         // Set the number of indices
         m_vao->setNumIndices(m_particles.size());
@@ -86,38 +85,6 @@ void Emitter::render() const
     m_vao->unbind();
 }
 //*/
-
-/*
-void Emitter::render() const
-{
-//  ngl::Mat4 look=ngl::lookAt({0,150,150},{0,0,0},{0,1,0});
-//  ngl::Mat4 persp=ngl::perspective(45.0f,1.0,0.1,200);
-  glPointSize(10);
-//  ngl::ShaderLib::setUniform("MVP", persp*look);
-  m_vao ->bind();
-  {
-      m_vao->setData(ngl::AbstractVAO::VertexData(m_particles.size()*sizeof(Particle),m_particles[0].pos.m_x));
-      m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(Particle),0);
-      m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(Particle),6);
-
-      m_vao->setNumIndices(m_particles.size());
-      m_vao->draw();
-  }
-  m_vao->bind();
-
-//  ngl::Transformation tx;
-//  for(auto p : m_particles)
-//  {
-//      tx.setPosition(p.pos);
-//      tx.setScale(p.size,p.size,p.size);
-//      ngl::ShaderLib::setUniform("MVP", persp*look*tx.getMatrix());
-//      ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
-//      ngl::VAOPrimitives::draw(ngl::buddah);
-////    fmt::print("{} ,{}, {} \n",p.pos.m_x,
-////               p.pos.m_y, p.pos.m_z);
-//  }
-}
-*/
 
 void Emitter::initializeGrid(int sizeX, int sizeY, int sizeZ, float cellSize)
 {
@@ -196,25 +163,7 @@ void Emitter::update()
                 p.colour -= ngl::Vec3(0.01f,0.0f,0.0f);
             }
 
-            /// Redirects points to center
-            if (p.pos.m_x > 10)
-            {
-                p.dir += ngl::Vec3(1,0,0);
-            }
-            if (p.pos.m_x < -10)
-            {
-                p.dir -= ngl::Vec3(1,0,0);
-            }
-            if (p.pos.m_z > 10)
-            {
-                p.dir += ngl::Vec3(0,0,1);
-            }
-            if (p.pos.m_z < -10)
-            {
-                p.dir -= ngl::Vec3(0,0,10);
-            }
-
-//        p.dir += gravity * _dt * 0.5 / p.randomness; // for campfire
+//            p.dir += gravity * _dt * 0.5 / p.randomness; // for campfire
             p.dir += gravity * _dt * 0.5; // for fluid
             p.pos += p.dir * _dt;
             p.size -= 0.1f;
@@ -285,6 +234,8 @@ ngl::Vec3 normalized(const ngl::Vec3 &v)
 
 void Emitter::handleParticleCollision(Particle &particleA, Particle &particleB)
 {
+    particleA.colour = ngl::Vec3(1.0f,1.0f,1.0f);
+
     // Calculate the distance between the two particles
     ngl::Vec3 displacement = particleA.pos - particleB.pos;
     float distance = displacement.length();

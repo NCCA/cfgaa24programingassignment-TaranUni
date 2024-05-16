@@ -126,7 +126,7 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     ngl::Transformation m_transform;
     //----------------------------------------------------------------------------------------------------------------------
-    void loadMatricesToShader();
+    void loadMatricesToShader(const std::string &_shader);
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief draw our scene passing in the shader to use
     /// @param[in] _shader the name of the shader to use when drawing

@@ -98,6 +98,8 @@ void NGLScene::initializeGL()
     // in the code create some constexpr
     constexpr auto vertexShader = "PBRVertex";
     constexpr auto fragShader = "PBRFragment";
+    constexpr auto shaderProgram = "PBR";
+
     // create the shader program
     ngl::ShaderLib::createShaderProgram(shaderProgram);
     // now we are going to create empty shaders for Frag and Vert
@@ -116,8 +118,6 @@ void NGLScene::initializeGL()
     ngl::ShaderLib::linkProgramObject(shaderProgram);
     // and make it active ready to load values
     ngl::ShaderLib::use(shaderProgram);
-
-//    ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
 
     // We now create our view matrix for a static camera
     ngl::Vec3 from(0.0f, 2.0f, 10.0f);
@@ -143,7 +143,9 @@ void NGLScene::initializeGL()
 
     ngl::VAOPrimitives::createDisk("disk", 200.0f, 120);
     // this timer is going to trigger an event every 40ms which will be processed in the
-    //
+
+    ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
+
     m_lightTimer = startTimer(40);
 }
 
@@ -185,7 +187,7 @@ void NGLScene::timerEvent(QTimerEvent *_event)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void NGLScene::loadMatricesToShader()
+void NGLScene::loadMatricesToShader(const std::string &_shader)
 {
     struct transform
     {
@@ -198,34 +200,26 @@ void NGLScene::loadMatricesToShader()
     t.M = m_view * m_mouseGlobalTX * m_transform.getMatrix();
     t.MVP = m_project * t.M;
 
-    ngl::ShaderLib::use("PBR");
-    t.normalMatrix = t.M;
-    t.normalMatrix.inverse().transpose();
-
-    ngl::ShaderLib::setUniformBuffer("TransformUBO", sizeof(transform), &t.MVP.m_00);
-
-    ngl::ShaderLib::setUniform("lightPosition", (m_mouseGlobalTX * m_lightPos).toVec3());
-
-//    if (m_showPBR == true)
-//    {
-//        ngl::ShaderLib::use("PBR");
-//        t.normalMatrix = t.M;
-//        t.normalMatrix.inverse().transpose();
+//    ngl::ShaderLib::use("PBR");
+//    t.normalMatrix = t.M;
+//    t.normalMatrix.inverse().transpose();
 //
-//        ngl::ShaderLib::setUniformBuffer("TransformUBO", sizeof(transform), &t.MVP.m_00);
+//    ngl::ShaderLib::setUniformBuffer("TransformUBO", sizeof(transform), &t.MVP.m_00);
 //
-//        ngl::ShaderLib::setUniform("lightPosition", (m_mouseGlobalTX * m_lightPos).toVec3());
-//        m_showPBR = false;
-//    }
-//
-//
-//    if (m_showParticles == true)
-//    {
-//        ngl::ShaderLib::use("particleShader");
-//        ngl::ShaderLib::setUniform("MVP", t.MVP);
-//        m_showParticles = false;
-//    }
+//    ngl::ShaderLib::setUniform("lightPosition", (m_mouseGlobalTX * m_lightPos).toVec3());
 
+    ngl::ShaderLib::use(_shader);
+    if (_shader == "PBR")
+    {
+        t.normalMatrix = t.M;
+        t.normalMatrix.inverse().transpose();
+        ngl::ShaderLib::setUniformBuffer("TransformUBO", sizeof(transform), &t.MVP.m_00);
+        ngl::ShaderLib::setUniform("lightPosition", (m_mouseGlobalTX * m_lightPos).toVec3());
+    }
+    else if (_shader == "ParticleShader")
+    {
+        ngl::ShaderLib::setUniform("MVP", t.MVP);
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -243,25 +237,40 @@ void NGLScene::drawScene(const std::string &_shader)
     m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
     m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
 
-    m_transform.reset();
-    {
-        ngl::ShaderLib::setUniform("lightColor", 40000.0f, 40000.0f, 40000.0f);
-        ngl::ShaderLib::use("PBR");
-        m_transform.setPosition(0.0f, -200.0f, 0.0f);
-        m_transform.setRotation(90.0f, 0.0f, 0.0f);
-        m_showPBR = true;
-        loadMatricesToShader();
-        ngl::VAOPrimitives::draw("disk");
-    } // and before a pop
 
     m_transform.reset();
+    if (_shader == "PBR")
     {
-//        ngl::ShaderLib::use("ParticleShader");
-        m_showParticles = true;
-        loadMatricesToShader();
+        ngl::ShaderLib::setUniform("lightColor", 40000.0f, 40000.0f, 40000.0f);
+        m_transform.setPosition(0.0f, -20.0f, 0.0f);
+        m_transform.setRotation(90.0f, 0.0f, 0.0f);
+        loadMatricesToShader("PBR");
+        ngl::VAOPrimitives::draw("disk");
+    }
+    else if (_shader == "ParticleShader")
+    {
+        loadMatricesToShader("ParticleShader");
         m_emmiter->render();
-//        m_showParticles = false;
-    } // and before a pop
+    }
+
+//    m_transform.reset();
+//    {
+//        ngl::ShaderLib::setUniform("lightColor", 40000.0f, 40000.0f, 40000.0f);
+//        ngl::ShaderLib::use("PBR");
+//        m_transform.setPosition(0.0f, -200.0f, 0.0f);
+//        m_transform.setRotation(90.0f, 0.0f, 0.0f);
+//        m_showPBR = true;
+//        loadMatricesToShader();
+//        ngl::VAOPrimitives::draw("disk");
+//    } // and before a pop
+//
+//    m_transform.reset();
+//    {
+//        ngl::ShaderLib::use("ParticleShader");
+//        m_showParticles = true;
+//        loadMatricesToShader();
+//        m_emmiter->render();
+//    } // and before a pop
 
     QPainter painter(this);
     painter.setPen(Qt::blue);
@@ -274,16 +283,6 @@ void NGLScene::drawScene(const std::string &_shader)
 
 }
 
-//void NGLScene::paintGL()
-//{
-//    // clear the screen and depth buffer
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    glViewport(0, 0, m_win.width, m_win.height);
-//    drawScene("PBR");
-//}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 //----------------------------------------------------------------------------------------------------------------------
 
 void NGLScene::paintGL()
@@ -292,88 +291,14 @@ void NGLScene::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, m_win.width, m_win.height);
 
-    // Draw scene with particleShader
-//    drawScene("ParticleShader");
-
     // Draw scene with PBR shader
     drawScene("PBR");
 
-//    if (m_showDisk)
-//    {
-//        // Draw scene with PBR shader
-//        drawScene("PBR");
-//    }
-//    if (m_showParticles)
-//    {
-//        //Draw scene with particleShader
-//        drawScene("ParticleShader");
-//    }
+    // Draw scene with particleShader
+    drawScene("ParticleShader");
 }
 
-//
-//void NGLScene::paintGL()
-//{
-//    // Clear the screen and depth buffer
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    glViewport(0, 0, m_win.width, m_win.height);
-//
-//    // Set up the view matrix
-//    auto rotX = ngl::Mat4::rotateX(m_win.spinXFace);
-//    auto rotY = ngl::Mat4::rotateY(m_win.spinYFace);
-//    auto m_mouseGlobalTX = rotX * rotY;
-//    // add the translations
-//    m_mouseGlobalTX.m_m[3][0] = m_modelPos.m_x;
-//    m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
-//    m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
-//
-//
-//    // Set the MVP matrix for the particles
-////    ngl::ShaderLib::use("ParticleShader");
-////    ngl::Mat4 particleMVP = m_project * m_view * m_mouseGlobalTX;
-////    loadMatricesToShader();
-////    ngl::ShaderLib::setUniform("MVP", particleMVP);
-////    m_emmiter->render();
-//
-//    m_transform.reset();
-//    {
-//        ngl::ShaderLib::use("ParticleShader");
-//        loadMatricesToShader();
-//        m_emmiter->render();
-//    } // and before a pop
-//
-//    m_transform.reset();
-//    {
-//        ngl::ShaderLib::use("ObjectShader");
-//        m_transform.setPosition(0.0f, -10.0f, 1.0f);
-//        m_transform.setRotation(90.0f, 0.0f, 0.0f);
-//        loadMatricesToShader();
-//        ngl::VAOPrimitives::draw("disk");
-//    } // and before a pop
-//    // Render the disk
-////    ngl::ShaderLib::use("ObjectShader");
-//
-//    // Reset the transform to avoid cumulative transformations
-////    m_transform.reset();
-//
-//    // Set the transformation for the disk
-////    m_transform.setPosition(0.0f, -10.0f, 1.0f);
-////    m_transform.setRotation(90.0f, 0.0f, 0.0f);
-//
-//    // Set the color uniform
-////    ngl::ShaderLib::setUniform("Colour", 0.4f, 0.3f, 0.2f, 1.0f);
-//
-//    // Load the transformation matrices to the shader
-////    loadMatricesToShader();
-//
-//    // Draw the disk
-////    ngl::VAOPrimitives::draw("disk");
-//
-//    // Update the display
-//    update();
-//}
-
 //----------------------------------------------------------------------------------------------------------------------
-
 
 void NGLScene::keyPressEvent(QKeyEvent *_event)
 {
