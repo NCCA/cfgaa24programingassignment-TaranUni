@@ -39,6 +39,7 @@ private :
   int m_gridSizeY;
   int m_gridSizeZ;
   float m_cellSize;
+  static constexpr int NEIGHBOR_RADIUS = 2;
 
   void initializeGrid(int sizeX, int sizeY, int sizeZ, float cellSize);
   void indexParticleInGrid(Particle& p);

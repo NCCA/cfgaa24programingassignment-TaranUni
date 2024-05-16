@@ -130,6 +130,146 @@ void Emitter::update()
         }
     }
 
+    // Update particles
+    float _dt = 0.1f; // Delta Time
+    ngl::Vec3 gravity(0, -9.87, 0); // Gravity
+
+    // Iterate over all particles
+    for (auto& p : m_particles)
+    {
+        if (p.isAlive)
+        {
+            ngl::ShaderLib::setUniform("Colour",400*p.colour.m_r,400*p.colour.m_g,400*p.colour.m_b,1.0f);
+            p.colour -= ngl::Vec3(0.0f,0.0f,0.05f);
+            if (p.colour.m_z < 0)
+            {
+                p.colour -= ngl::Vec3(0.0f,0.02f,0.0f);
+            }
+            if (p.colour.m_y < 0)
+            {
+                p.colour -= ngl::Vec3(0.01f,0.0f,0.0f);
+            }
+
+            /// Redirects points to center
+            if (p.pos.m_x > 10)
+            {
+                p.dir += ngl::Vec3(1,0,0);
+            }
+            if (p.pos.m_x < -10)
+            {
+                p.dir -= ngl::Vec3(1,0,0);
+            }
+            if (p.pos.m_z > 10)
+            {
+                p.dir += ngl::Vec3(0,0,1);
+            }
+            if (p.pos.m_z < -10)
+            {
+                p.dir -= ngl::Vec3(0,0,10);
+            }
+
+//        p.dir += gravity * _dt * 0.5 / p.randomness; // for campfire
+            p.dir += gravity * _dt * 0.5; // for fluid
+            p.pos += p.dir * _dt;
+            p.size -= 0.1f;
+            /// Kill particle
+            if (--p.life <= 0 && p.pos.m_y >= 200.0)
+            {
+                createZeroParticle(p);
+                p.isAlive = false;
+            }
+            /// Create Boundary Box Collision
+            handleBoundaryCollisions(p);
+
+            // Index particle in the grid
+            indexParticleInGrid(p);
+        }
+    }
+
+    // Iterate over grid cells to perform collision checks only for nearby particles
+    for (int x = 0; x < m_gridSizeX; ++x)
+    {
+        for (int y = 0; y < m_gridSizeY; ++y)
+        {
+            for (int z = 0; z < m_gridSizeZ; ++z)
+            {
+                // Get nearby particles within a 2-grid radius
+                auto& currentCell = m_grid[x][y][z];
+                for (int offsetX = -2; offsetX <= 2; ++offsetX)
+                {
+                    for (int offsetX = -NEIGHBOR_RADIUS; offsetX <= NEIGHBOR_RADIUS; ++offsetX)
+                    {
+                        for (int offsetY = -NEIGHBOR_RADIUS; offsetY <= NEIGHBOR_RADIUS; ++offsetY)
+                        {
+                            for (int offsetZ = -NEIGHBOR_RADIUS; offsetZ <= NEIGHBOR_RADIUS; ++offsetZ)
+                            {
+                                // Calculate neighboring cell coordinates
+                                int neighborX = x + offsetX;
+                                int neighborY = y + offsetY;
+                                int neighborZ = z + offsetZ;
+
+                                // Check if neighbor cell is within grid bounds
+                                if (neighborX >= 0 && neighborX < m_gridSizeX &&
+                                    neighborY >= 0 && neighborY < m_gridSizeY &&
+                                    neighborZ >= 0 && neighborZ < m_gridSizeZ)
+                                {
+                                    // Iterate over nearby particles in the neighbor cell
+                                    auto& neighborCell = m_grid[neighborX][neighborY][neighborZ];
+                                    for (auto& neighborParticle : neighborCell.particles)
+                                    {
+                                        // Perform collision check between current particle and neighbor particle
+                                        handleParticleCollision(p, *neighborParticle);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Emitter::handleParticleCollision(Particle& particleA, Particle& particleB)
+{
+    // Calculate the distance between the two particles
+    float distance = (particleA.pos - particleB.pos).length();
+
+    // If the distance is less than a threshold (e.g., sum of radii), they collide
+    float collisionThreshold = particleA.size + particleB.size;
+    if (distance < collisionThreshold)
+    {
+        // Handle collision effects (e.g., bounce off, merge, etc.)
+        // Here's a simple example of particles bouncing off each other:
+        ngl::Vec3 relativeVelocity = particleA.dir - particleB.dir; // Calculate relative velocity
+        float relativeSpeed = relativeVelocity; // Calculate relative speed along the normal
+
+        // Check if particles are moving towards each other
+        if (relativeSpeed < 0)
+        {
+            // Apply collision response - reverse velocities along the collision normal
+            particleA.dir -= 2 * relativeSpeed * normal;
+            particleB.dir -= 2 * relativeSpeed * normal;
+        }
+    }
+}
+
+
+/*
+void Emitter::update()
+{
+    // Clear the grid
+    for (auto& plane : m_grid)
+    {
+        for (auto& row : plane)
+        {
+            for (auto& cell : row)
+            {
+                cell.particles.clear();
+            }
+        }
+    }
+
 //    usleep(50000); // Delays the update for Debugging purposes.
 float _dt=0.1f; // Delta Time
 ngl::Vec3 gravity(0,-9.87, 0); // Gravity
@@ -154,7 +294,7 @@ for(int i=0; i<numberToBirth; ++i)
   {
     if (p.isAlive == true)
     {
-        ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
+        ngl::ShaderLib::setUniform("Colour",400*p.colour.m_r,400*p.colour.m_g,400*p.colour.m_b,1.0f);
         p.colour -= ngl::Vec3(0.0f,0.0f,0.05f);
         if (p.colour.m_z < 0)
         {
@@ -165,23 +305,23 @@ for(int i=0; i<numberToBirth; ++i)
             p.colour -= ngl::Vec3(0.01f,0.0f,0.0f);
         }
 
-//        /// Redirects points to center
-//        if (p.pos.m_x > 10)
-//        {
-//            p.dir += ngl::Vec3(1,0,0);
-//        }
-//        if (p.pos.m_x < -10)
-//        {
-//            p.dir -= ngl::Vec3(1,0,0);
-//        }
-//        if (p.pos.m_z > 10)
-//        {
-//            p.dir += ngl::Vec3(0,0,1);
-//        }
-//        if (p.pos.m_z < -10)
-//        {
-//            p.dir -= ngl::Vec3(0,0,10);
-//        }
+        /// Redirects points to center
+        if (p.pos.m_x > 10)
+        {
+            p.dir += ngl::Vec3(1,0,0);
+        }
+        if (p.pos.m_x < -10)
+        {
+            p.dir -= ngl::Vec3(1,0,0);
+        }
+        if (p.pos.m_z > 10)
+        {
+            p.dir += ngl::Vec3(0,0,1);
+        }
+        if (p.pos.m_z < -10)
+        {
+            p.dir -= ngl::Vec3(0,0,10);
+        }
 
 //        p.dir += gravity * _dt * 0.5 / p.randomness; // for campfire
         p.dir += gravity * _dt * 0.5; // for fluid
@@ -198,8 +338,9 @@ for(int i=0; i<numberToBirth; ++i)
     }
   }
 }
+*/
 
-// Returns the color of the Tetromino.
+// Returns the color of the Particle.
 ngl::Vec4 Particle::getColour() const
 {
     return ngl::Vec4(colour,1.0f);
