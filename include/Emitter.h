@@ -26,7 +26,9 @@ private :
   void createDefaultParticle(Particle &_p);
   void createZeroParticle(Particle &_p);
   void handleBoundaryCollisions(Particle &_p);
-  void handleParticleCollisions(Particle &_p);// Left over from unoptimized collision detection.
+
+  void handleParticleCollision(Particle &particleA, Particle &particleB);// Left over from unoptimized collision detection.
+
   std::vector<Particle> m_particles;
   ngl::Vec3 m_position={0,0,0};
   float m_spread = 15.0f; // how far particles are ejected

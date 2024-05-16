@@ -117,7 +117,7 @@ void NGLScene::initializeGL()
     // and make it active ready to load values
     ngl::ShaderLib::use(shaderProgram);
 
-//    ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
+    ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
 
     // We now create our view matrix for a static camera
     ngl::Vec3 from(0.0f, 2.0f, 10.0f);
@@ -238,7 +238,8 @@ void NGLScene::drawScene(const std::string &_shader)
 
     m_transform.reset();
     {
-        ngl::ShaderLib::setUniform("lightColor", 40000.0f, 0.0f, 0.0f);
+        ngl::ShaderLib::setUniform("lightColor", 40000.0f, 40000.0f, 40000.0f);
+        ngl::ShaderLib::use("ParticleShader");
         loadMatricesToShader();
         m_emmiter->render();
     } // and before a pop
@@ -270,6 +271,9 @@ void NGLScene::paintGL()
     // clear the screen and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, m_win.width, m_win.height);
+
+    // Draw scene with particleShader
+    drawScene("ParticleShader");
 
     // Draw scene with PBR shader
     drawScene("PBR");

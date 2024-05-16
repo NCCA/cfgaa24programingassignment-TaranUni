@@ -57,6 +57,37 @@ ngl::Vec3 Emitter::randomVectorOnSphere()
 
 void Emitter::render() const
 {
+    glPointSize(10);
+
+    // Bind the VAO
+    m_vao->bind();
+    {
+        // Set the vertex data for the particles
+        m_vao->setData(ngl::AbstractVAO::VertexData(m_particles.size() * sizeof(Particle), m_particles[0].pos.m_x));
+
+        // Position attribute
+        m_vao->setVertexAttributePointer(0, 3, GL_FLOAT, sizeof(Particle), 0);
+
+        // Color attribute (assuming it starts at offset 6 in Particle)
+        m_vao->setVertexAttributePointer(1, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, colour));
+
+        // Size attribute (assuming it starts at offset 12 in Particle)
+        m_vao->setVertexAttributePointer(2, 1, GL_FLOAT, sizeof(Particle), offsetof(Particle, size));
+
+        // Set the number of indices
+        m_vao->setNumIndices(m_particles.size());
+
+        // Draw the particles
+        m_vao->draw();
+    }
+    // Unbind the VAO
+    m_vao->unbind();
+}
+
+
+/*
+void Emitter::render() const
+{
 //  ngl::Mat4 look=ngl::lookAt({0,150,150},{0,0,0},{0,1,0});
 //  ngl::Mat4 persp=ngl::perspective(45.0f,1.0,0.1,200);
   glPointSize(10);
@@ -84,6 +115,7 @@ void Emitter::render() const
 ////               p.pos.m_y, p.pos.m_z);
 //  }
 }
+*/
 
 void Emitter::initializeGrid(int sizeX, int sizeY, int sizeZ, float cellSize)
 {
@@ -195,13 +227,13 @@ void Emitter::update()
             {
                 // Get nearby particles within a 2-grid radius
                 auto& currentCell = m_grid[x][y][z];
-                for (int offsetX = -2; offsetX <= 2; ++offsetX)
+                for (auto& particle : currentCell.particles)
                 {
-                    for (int offsetX = -NEIGHBOR_RADIUS; offsetX <= NEIGHBOR_RADIUS; ++offsetX)
+                    for (int offsetX = -2; offsetX <= 2; ++offsetX)
                     {
-                        for (int offsetY = -NEIGHBOR_RADIUS; offsetY <= NEIGHBOR_RADIUS; ++offsetY)
+                        for (int offsetY = -2; offsetY <= 2; ++offsetY)
                         {
-                            for (int offsetZ = -NEIGHBOR_RADIUS; offsetZ <= NEIGHBOR_RADIUS; ++offsetZ)
+                            for (int offsetZ = -2; offsetZ <= 2; ++offsetZ)
                             {
                                 // Calculate neighboring cell coordinates
                                 int neighborX = x + offsetX;
@@ -218,7 +250,7 @@ void Emitter::update()
                                     for (auto& neighborParticle : neighborCell.particles)
                                     {
                                         // Perform collision check between current particle and neighbor particle
-                                        handleParticleCollision(p, *neighborParticle);
+                                        handleParticleCollision(*particle, *neighborParticle);
                                     }
                                 }
                             }
@@ -230,6 +262,44 @@ void Emitter::update()
     }
 }
 
+ngl::Vec3 normalized(const ngl::Vec3 &v)
+{
+    ngl::Vec3 result = v;
+    result.normalize();
+    return result;
+}
+
+void Emitter::handleParticleCollision(Particle &particleA, Particle &particleB)
+{
+    // Calculate the distance between the two particles
+    ngl::Vec3 displacement = particleA.pos - particleB.pos;
+    float distance = displacement.length();
+
+    // If the distance is less than a threshold (e.g., sum of radii), they collide
+    float collisionThreshold = particleA.size + particleB.size;
+    if (distance < collisionThreshold)
+    {
+        // Handle collision effects (e.g., bounce off, merge, etc.)
+        // Here's a simple example of particles bouncing off each other:
+        ngl::Vec3 relativeVelocity = particleA.dir - particleB.dir; // Calculate relative velocity
+        float relativeSpeed = relativeVelocity.dot(normalized(displacement)); // Calculate relative speed along the normal
+
+        // Check if particles are moving towards each other
+        if (relativeSpeed < 0)
+        {
+            // Apply collision response - reverse velocities along the collision normal
+            ngl::Vec3 collisionNormal = normalized(displacement);
+            particleA.dir -= 2 * relativeSpeed * collisionNormal;
+            particleB.dir += 2 * relativeSpeed * collisionNormal;
+        }
+    }
+}
+
+
+
+
+
+/*
 void Emitter::handleParticleCollision(Particle& particleA, Particle& particleB)
 {
     // Calculate the distance between the two particles
@@ -242,17 +312,17 @@ void Emitter::handleParticleCollision(Particle& particleA, Particle& particleB)
         // Handle collision effects (e.g., bounce off, merge, etc.)
         // Here's a simple example of particles bouncing off each other:
         ngl::Vec3 relativeVelocity = particleA.dir - particleB.dir; // Calculate relative velocity
-        float relativeSpeed = relativeVelocity; // Calculate relative speed along the normal
+        float relativeSpeed = relativeVelocity.dot(relativeVelocity); // Calculate relative speed along the normal
 
         // Check if particles are moving towards each other
-        if (relativeSpeed < 0)
+        if (relativeSpeed < (0,0,0))
         {
             // Apply collision response - reverse velocities along the collision normal
-            particleA.dir -= 2 * relativeSpeed * normal;
-            particleB.dir -= 2 * relativeSpeed * normal;
+            particleA.dir -= 2 * relativeSpeed * particleA.dir;
+            particleB.dir -= 2 * relativeSpeed * particleB.dir;
         }
     }
-}
+}*/
 
 
 /*
