@@ -24,6 +24,9 @@ I will also just stick with showing just the smoke view.~~
 I have decided to use this video as referance [Sebastian Lague](https://www.youtube.com/watch?v=rSKMYc1CQHE&) on how to create a realistic particle based fluid sim. I think this method will be easier to implement with current code.~~
 
 I gave up on the fluid sim due to time constraints and complexity in optimising the code.
+
+**Fire VFX** I am now just using the particles for this.
+
 #### Old Collision code
 ```C++
 void Emitter::update()
