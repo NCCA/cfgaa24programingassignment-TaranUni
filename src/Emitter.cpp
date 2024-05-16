@@ -132,7 +132,8 @@ void Emitter::update()
     }
 
     /// Randomizes particles birthed
-    int numberToBirth=10+ngl::Random::randomPositiveNumber(10);
+//    int numberToBirth=10+ngl::Random::randomPositiveNumber(10);
+    int numberToBirth = 1000;
 
     /// This generates the particles until it has run through numberToBirth
     for(int i=0; i<numberToBirth; ++i)
@@ -260,11 +261,11 @@ void Emitter::handleBoundaryCollisions(Particle &p)
     {
         p.dir.set(p.dir.m_x,p.dir.m_y = 1+(p.dir.m_y -= (2 * p.dir.m_y)), p.dir.m_z); // Reverse y direction
     }
-    if (p.pos.m_x <= -50.0 || p.pos.m_x >= 50.0)
+    if (p.pos.m_x <= -10.0 || p.pos.m_x >= 10.0)
     {
         p.dir.set(p.dir.m_x *= -1, p.dir.m_y, p.dir.m_z); // Reverse x direction
     }
-    if (p.pos.m_z <= -50.0 || p.pos.m_z >= 50.0)
+    if (p.pos.m_z <= -10.0 || p.pos.m_z >= 10.0)
     {
         p.dir.set(p.dir.m_x, p.dir.m_y, p.dir.m_z *= -1); // Reverse z direction
     }
