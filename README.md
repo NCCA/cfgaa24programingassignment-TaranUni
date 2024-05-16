@@ -5,7 +5,7 @@
 - Flip Fluid Sim
 - Eulerian Fluid Sim
 - Fire Sim
-- Particle Based Fluid Sim
+- **Particle Based Fluid Sim**
 
 ## What i'm planning on doing
 
@@ -25,6 +25,7 @@ I have decided to use this video as referance [Sebastian Lague](https://www.yout
 
 I found it hard to use Sebastian Lagues video to implement the optimization step as I found some parts had explanations which made the problem seem more confusing than it was, for instance the collision radius effect 
 
+**https://github.com/NCCA/cfgaa24programingassignment-TaranUni/blob/main/Program%20Footage.mp4**
 
 ### ~~**Fire VFX** I am now just using the particles for this.~~
 I gave up on the fluid sim due to time constraints and complexity in optimising the code.
