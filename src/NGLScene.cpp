@@ -117,7 +117,7 @@ void NGLScene::initializeGL()
     // and make it active ready to load values
     ngl::ShaderLib::use(shaderProgram);
 
-    ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
+//    ngl::ShaderLib::loadShader("ParticleShader","shaders/ParticleVertex.glsl","shaders/ParticleFragment.glsl");
 
     // We now create our view matrix for a static camera
     ngl::Vec3 from(0.0f, 2.0f, 10.0f);
@@ -126,17 +126,17 @@ void NGLScene::initializeGL()
     // now load to our new camera
     m_view = ngl::lookAt(from, to, up);
     m_project = ngl::perspective(45.0f, 1024.0f/720.0f, 0.05f, 350.0f);
-
     ngl::ShaderLib::setUniform("camPos", from);
+
     // now a light
     m_lightPos.set(0.0, 400.0f, 0.0f, 1.0f);
+
     // setup the default shader material and light porerties
     // these are "uniform" so will retain their values
     ngl::ShaderLib::setUniform("lightPosition", m_lightPos.toVec3());
-    ngl::ShaderLib::setUniform("lightColor", 40000.0f, 40000.0f, 40000.0f);
+    ngl::ShaderLib::setUniform("lightColor", 10000.0f, 10000.0f, 10000.0f);
     ngl::ShaderLib::setUniform("exposure", 3.0f);
     ngl::ShaderLib::setUniform("albedo", 0.950f, 0.71f, 0.29f);
-
     ngl::ShaderLib::setUniform("metallic", 1.0f);
     ngl::ShaderLib::setUniform("roughness", 0.38f);
     ngl::ShaderLib::setUniform("ao", 0.2f);
@@ -187,7 +187,6 @@ void NGLScene::timerEvent(QTimerEvent *_event)
 
 void NGLScene::loadMatricesToShader()
 {
-    ngl::ShaderLib::use("PBR");
     struct transform
     {
         ngl::Mat4 MVP;
@@ -197,18 +196,36 @@ void NGLScene::loadMatricesToShader()
 
     transform t;
     t.M = m_view * m_mouseGlobalTX * m_transform.getMatrix();
-
-
     t.MVP = m_project * t.M;
+
+    ngl::ShaderLib::use("PBR");
     t.normalMatrix = t.M;
     t.normalMatrix.inverse().transpose();
-    if (m_showParticles)
-    {
-        t.M = m_view * m_mouseGlobalTX * m_transform.getMatrix();
-    }
+
     ngl::ShaderLib::setUniformBuffer("TransformUBO", sizeof(transform), &t.MVP.m_00);
 
     ngl::ShaderLib::setUniform("lightPosition", (m_mouseGlobalTX * m_lightPos).toVec3());
+
+//    if (m_showPBR == true)
+//    {
+//        ngl::ShaderLib::use("PBR");
+//        t.normalMatrix = t.M;
+//        t.normalMatrix.inverse().transpose();
+//
+//        ngl::ShaderLib::setUniformBuffer("TransformUBO", sizeof(transform), &t.MVP.m_00);
+//
+//        ngl::ShaderLib::setUniform("lightPosition", (m_mouseGlobalTX * m_lightPos).toVec3());
+//        m_showPBR = false;
+//    }
+//
+//
+//    if (m_showParticles == true)
+//    {
+//        ngl::ShaderLib::use("particleShader");
+//        ngl::ShaderLib::setUniform("MVP", t.MVP);
+//        m_showParticles = false;
+//    }
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -230,18 +247,20 @@ void NGLScene::drawScene(const std::string &_shader)
     {
         ngl::ShaderLib::setUniform("lightColor", 40000.0f, 40000.0f, 40000.0f);
         ngl::ShaderLib::use("PBR");
-        m_transform.setPosition(0.0f, -40.0f, 0.0f);
+        m_transform.setPosition(0.0f, -200.0f, 0.0f);
         m_transform.setRotation(90.0f, 0.0f, 0.0f);
+        m_showPBR = true;
         loadMatricesToShader();
         ngl::VAOPrimitives::draw("disk");
     } // and before a pop
 
     m_transform.reset();
     {
-        ngl::ShaderLib::setUniform("lightColor", 40000.0f, 40000.0f, 40000.0f);
-        ngl::ShaderLib::use("ParticleShader");
+//        ngl::ShaderLib::use("ParticleShader");
+        m_showParticles = true;
         loadMatricesToShader();
         m_emmiter->render();
+//        m_showParticles = false;
     } // and before a pop
 
     QPainter painter(this);
@@ -250,7 +269,8 @@ void NGLScene::drawScene(const std::string &_shader)
     painter.drawText(QRect(50, -50, width(), height()), Qt::AlignLeft + Qt::AlignBottom, "Scroll: Zoom \n "
                                                                                          "Left-Click hold: Tumble Scene \n "
                                                                                          "Right-Click hold: Shift Scene \n"
-                                                                                         "Space: Reset camera");
+                                                                                         "Space: Reset camera \n"
+                                                                                         "ESC: Exit program");
 
 }
 
@@ -273,7 +293,7 @@ void NGLScene::paintGL()
     glViewport(0, 0, m_win.width, m_win.height);
 
     // Draw scene with particleShader
-    drawScene("ParticleShader");
+//    drawScene("ParticleShader");
 
     // Draw scene with PBR shader
     drawScene("PBR");

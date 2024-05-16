@@ -55,6 +55,7 @@ ngl::Vec3 Emitter::randomVectorOnSphere()
                      r* cosf(theta));
 }
 
+///*
 void Emitter::render() const
 {
     glPointSize(10);
@@ -66,13 +67,14 @@ void Emitter::render() const
         m_vao->setData(ngl::AbstractVAO::VertexData(m_particles.size() * sizeof(Particle), m_particles[0].pos.m_x));
 
         // Position attribute
-        m_vao->setVertexAttributePointer(0, 3, GL_FLOAT, sizeof(Particle), 0);
+        m_vao->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(Particle),0);
+        m_vao->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(Particle),6);
 
         // Color attribute (assuming it starts at offset 6 in Particle)
-        m_vao->setVertexAttributePointer(1, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, colour));
+        m_vao->setVertexAttributePointer(2, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, colour));
 
         // Size attribute (assuming it starts at offset 12 in Particle)
-        m_vao->setVertexAttributePointer(2, 1, GL_FLOAT, sizeof(Particle), offsetof(Particle, size));
+        m_vao->setVertexAttributePointer(3, 3, GL_FLOAT, sizeof(Particle), offsetof(Particle, size));
 
         // Set the number of indices
         m_vao->setNumIndices(m_particles.size());
@@ -83,7 +85,7 @@ void Emitter::render() const
     // Unbind the VAO
     m_vao->unbind();
 }
-
+//*/
 
 /*
 void Emitter::render() const
@@ -162,6 +164,18 @@ void Emitter::update()
         }
     }
 
+    int numberToBirth=10+ngl::Random::randomPositiveNumber(10);
+
+    for(int i=0; i<numberToBirth; ++i)
+    {
+        auto p = std::find_if(std::begin(m_particles),std::end(m_particles),
+                              [](auto p)
+                              {
+                                  return p.isAlive==false;
+                              });
+        createDefaultParticle(*p);
+    }
+
     // Update particles
     float _dt = 0.1f; // Delta Time
     ngl::Vec3 gravity(0, -9.87, 0); // Gravity
@@ -171,7 +185,7 @@ void Emitter::update()
     {
         if (p.isAlive)
         {
-            ngl::ShaderLib::setUniform("Colour",400*p.colour.m_r,400*p.colour.m_g,400*p.colour.m_b,1.0f);
+            ngl::ShaderLib::setUniform("Colour",p.colour.m_r,p.colour.m_g,p.colour.m_b,1.0f);
             p.colour -= ngl::Vec3(0.0f,0.0f,0.05f);
             if (p.colour.m_z < 0)
             {
@@ -214,7 +228,7 @@ void Emitter::update()
             handleBoundaryCollisions(p);
 
             // Index particle in the grid
-            indexParticleInGrid(p);
+//            indexParticleInGrid(p);
         }
     }
 
@@ -229,11 +243,11 @@ void Emitter::update()
                 auto& currentCell = m_grid[x][y][z];
                 for (auto& particle : currentCell.particles)
                 {
-                    for (int offsetX = -2; offsetX <= 2; ++offsetX)
+                    for (int offsetX = -NEIGHBOR_RADIUS; offsetX <= NEIGHBOR_RADIUS; ++offsetX)
                     {
-                        for (int offsetY = -2; offsetY <= 2; ++offsetY)
+                        for (int offsetY = -NEIGHBOR_RADIUS; offsetY <= NEIGHBOR_RADIUS; ++offsetY)
                         {
-                            for (int offsetZ = -2; offsetZ <= 2; ++offsetZ)
+                            for (int offsetZ = - NEIGHBOR_RADIUS; offsetZ <= NEIGHBOR_RADIUS; ++offsetZ)
                             {
                                 // Calculate neighboring cell coordinates
                                 int neighborX = x + offsetX;
@@ -290,125 +304,10 @@ void Emitter::handleParticleCollision(Particle &particleA, Particle &particleB)
             // Apply collision response - reverse velocities along the collision normal
             ngl::Vec3 collisionNormal = normalized(displacement);
             particleA.dir -= 2 * relativeSpeed * collisionNormal;
-            particleB.dir += 2 * relativeSpeed * collisionNormal;
+            particleB.dir -= 2 * relativeSpeed * collisionNormal;
         }
     }
 }
-
-
-
-
-
-/*
-void Emitter::handleParticleCollision(Particle& particleA, Particle& particleB)
-{
-    // Calculate the distance between the two particles
-    float distance = (particleA.pos - particleB.pos).length();
-
-    // If the distance is less than a threshold (e.g., sum of radii), they collide
-    float collisionThreshold = particleA.size + particleB.size;
-    if (distance < collisionThreshold)
-    {
-        // Handle collision effects (e.g., bounce off, merge, etc.)
-        // Here's a simple example of particles bouncing off each other:
-        ngl::Vec3 relativeVelocity = particleA.dir - particleB.dir; // Calculate relative velocity
-        float relativeSpeed = relativeVelocity.dot(relativeVelocity); // Calculate relative speed along the normal
-
-        // Check if particles are moving towards each other
-        if (relativeSpeed < (0,0,0))
-        {
-            // Apply collision response - reverse velocities along the collision normal
-            particleA.dir -= 2 * relativeSpeed * particleA.dir;
-            particleB.dir -= 2 * relativeSpeed * particleB.dir;
-        }
-    }
-}*/
-
-
-/*
-void Emitter::update()
-{
-    // Clear the grid
-    for (auto& plane : m_grid)
-    {
-        for (auto& row : plane)
-        {
-            for (auto& cell : row)
-            {
-                cell.particles.clear();
-            }
-        }
-    }
-
-//    usleep(50000); // Delays the update for Debugging purposes.
-float _dt=0.1f; // Delta Time
-ngl::Vec3 gravity(0,-9.87, 0); // Gravity
-ngl::Vec3 random(0,0, 0); // random direction vector
-static int numP =0;
-bool collision = false;
-
-// choose number to birth
-// find first not alive and set as new particle
-int numberToBirth=10+ngl::Random::randomPositiveNumber(10);
-
-for(int i=0; i<numberToBirth; ++i)
-{
-  auto p = std::find_if(std::begin(m_particles),std::end(m_particles),
-                        [](auto p)
-                        {
-                          return p.isAlive==false;
-                        });
-  createDefaultParticle(*p);
-}
-  for(auto &p : m_particles)
-  {
-    if (p.isAlive == true)
-    {
-        ngl::ShaderLib::setUniform("Colour",400*p.colour.m_r,400*p.colour.m_g,400*p.colour.m_b,1.0f);
-        p.colour -= ngl::Vec3(0.0f,0.0f,0.05f);
-        if (p.colour.m_z < 0)
-        {
-            p.colour -= ngl::Vec3(0.0f,0.02f,0.0f);
-        }
-        if (p.colour.m_y < 0)
-        {
-            p.colour -= ngl::Vec3(0.01f,0.0f,0.0f);
-        }
-
-        /// Redirects points to center
-        if (p.pos.m_x > 10)
-        {
-            p.dir += ngl::Vec3(1,0,0);
-        }
-        if (p.pos.m_x < -10)
-        {
-            p.dir -= ngl::Vec3(1,0,0);
-        }
-        if (p.pos.m_z > 10)
-        {
-            p.dir += ngl::Vec3(0,0,1);
-        }
-        if (p.pos.m_z < -10)
-        {
-            p.dir -= ngl::Vec3(0,0,10);
-        }
-
-//        p.dir += gravity * _dt * 0.5 / p.randomness; // for campfire
-        p.dir += gravity * _dt * 0.5; // for fluid
-        p.pos += p.dir * _dt;
-        p.size -= 0.1f;
-        /// Kill particle
-      if (--p.life <= 0 && p.pos.m_y >= 200.0)
-      {
-          createZeroParticle(p);
-          p.isAlive = false;
-      }
-      /// Create Boundary Box Collision
-      handleBoundaryCollisions(p);
-    }
-  }
-}
-*/
 
 // Returns the color of the Particle.
 ngl::Vec4 Particle::getColour() const

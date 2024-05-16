@@ -133,9 +133,9 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     void drawScene(const std::string &_shader);
 
-    bool m_showDisk;
+    bool m_showPBR = false;
 
-    bool m_showParticles;
+    bool m_showParticles = false;
 
 };
 
