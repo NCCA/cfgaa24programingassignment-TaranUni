@@ -114,12 +114,23 @@ Because of this I am going to try making a first person scene with a campfire wi
 
 set up particle spheres of influence/ smoothing
 
+### Shader handling 
+-- Partially working currently working on intergrating with camera controls
+
+This picuture is before implementing the PBR shader, in this version I was using custom shaders.
+![This picuture is before implementing the PBR shader, in this version I was using custom shaders.][logo]
+
+[logo]: https://github.com/NCCA/cfgaa24programingassignment-TaranUni/assets/159461684/435d290b-4761-4bf0-a9c2-0dc7e90e4d53"
+
 **inter particle interaction**
 
 Improve camera controls
 -- Made Field of View Adjustable
 
 Add user interaction with particles
+
+Added VAOPrimitive with transforms, shaders and camera controls
+-- I had the particles and disk in the same scene, but the disk would slowly move upwards instead of staying still, currently trying to fix
 
 Create a UI
 
@@ -134,3 +145,6 @@ The Particle data structure is stored in "Particle.h" as part of a struct. This 
 The Emmiters parameters and functions are stored in "Emmiter.h" as part of a class.
 
 ## How the program will flow
+The program starts with Main.cpp then opens NGLScene (this is where the main code loop occurs).
+
+In NGLScene the window is set to grey the light's attributes are set, the emmiter and 
