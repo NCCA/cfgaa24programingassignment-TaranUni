@@ -1,4 +1,6 @@
 # Taran Jones CFGAA Assignment
+## What it looks like
+![AssignmentScreenie](https://github.com/NCCA/cfgaa24programingassignment-TaranUni/assets/159461684/536ca8e1-cf1f-4da7-a006-d5aad25b4445)
 
 [This is a video of the program running](https://github.com/NCCA/cfgaa24programingassignment-TaranUni/blob/main/Program%20Footage.mp4)
 
