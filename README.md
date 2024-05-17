@@ -56,7 +56,17 @@ The program starts with Main.cpp then opens NGLScene (this is where the main cod
 
 In NGLScene the window is set to grey the light's attributes are set, the emmiter and 
 
-# Diary <3
+## Design of classes/ Data structures
+
+I am using GLSL, C++, CMake and [NGL](https://github.com/NCCA/NGL.git) for this program.
+
+Currently using ngl VAO GL_POINTS to create simple particles
+
+The Particle data structure is stored in "Particle.h" as part of a struct. This also contains the default particle attribute declaration.
+
+The Emmiters parameters, functions and data are stored in "Emmiter.h" as part of a class.
+
+# Development Process/ Diary <3
 ## Assignment Ideas
 
 - Flip Fluid Sim
@@ -83,11 +93,12 @@ I have started my research with this video as referance by [Sebastian Lague](htt
 
 I found it hard to use Sebastian Lagues video to implement the optimization step as I found some parts had explanations which made the problem seem more confusing than it was, for instance the collision radius effect was overwhelming to look at and understand, when the effect radius of every particle is shown at once, instead of 2 or a few of them.
 
-To keep the video of my program short I only simulated 5000 particles at once allowing the box to fill quicker, although because of this the start is a bit slow on the FPS because of the way the optimization I implemented works, I found this video by [Pixel Physics](https://www.youtube.com/watch?v=J1thcSAT9Dc&list=PLzLQjQOvhO0bBCWPsERzBpuXG7HboGumv&index=14&) the best at explaining how it works. Essentially though the optimization works by creating a grid in this case 3D and use it as a way to index every particles general position, then only compare other particles that have an index value within a radius of two from the current particles own cell, which it resides in.
+To keep the video of my program short I only simulated 5000 particles at once allowing the box to fill quicker, although because of this the start is a bit slow on the FPS because of the way the optimization I implemented works, I found this video by [Inside Code](https://www.youtube.com/watch?v=w4Dosp2U74Y&) the best at explaining how it works. Essentially though the optimization works by creating a grid in this case 3D and use it as a way to index every particles general position, then only compare other particles that have an index value within a radius of two from the current particles own cell, which it resides in.  The other video by [Pixel Physics](https://www.youtube.com/watch?v=J1thcSAT9Dc&list=PLzLQjQOvhO0bBCWPsERzBpuXG7HboGumv&index=14&) also was very useful in explaining, they also go through the entire program simulation structure with code snippets, similar to sebastian Lague.
 
 #### ~~**Fire VFX** I am now just using the particles for this.~~
-I gave up on the fluid sim due to time constraints and complexity in optimising the code.
+~~I gave up on the fluid sim due to time constraints and complexity in optimising the code.~~
 
+I ended up flip flopping on this, as once I got shader handling working correctly I basically had everything needed for a fire sim, and so implementing the fluid sim would be the next step in complexity. At least this was my thinking.
 
 #### Old Collision code
 ```C++
@@ -173,13 +184,16 @@ Because of this I am going to try making a first person scene with a campfire wi
 
 ## Checklist
 
-~~Particle generation~~
+**Particle generation**
+-- Working
 
-~~Bounding box~~
+**Bounding box**
+-- Done and working
 
-set up particle spheres of influence/ smoothing
+**set up particle spheres of influence/ smoothing**
+-- Not setup currently collisions are immediate and not proportional
 
-### Shader handling 
+**Shader handling**
 -- Partially working currently working on intergrating with camera controls
 
 This picuture is before implementing the PBR shader, in this version I was using custom shaders.
@@ -188,26 +202,20 @@ This picuture is before implementing the PBR shader, in this version I was using
 [logo]: https://github.com/NCCA/cfgaa24programingassignment-TaranUni/assets/159461684/435d290b-4761-4bf0-a9c2-0dc7e90e4d53"
 
 **inter particle interaction**
+-- Done
 
 Improve camera controls
--- Made Field of View Adjustable
+-- ~~Made Field of View Adjustable~~ Need to re-implement.
 
-Add user interaction with particles
+**Add user interaction with particles**
+-- User interaction is not setup
 
-Added VAOPrimitive with transforms, shaders and camera controls
--- I had the particles and disk in the same scene, but the disk would slowly move upwards instead of staying still, currently trying to fix
+**Added VAOPrimitive with transforms, shaders and camera controls**
+-- I had the particles and disk in the same scene, ~~but the disk would slowly move upwards instead of staying still, currently trying to fix~~ **Fixed**.
 
-Create a UI
+**Create a UI**
+-- Basic Controlls are displayed to the player
 
-## Design of classes/ Data structures
-
-I am using GLSL, C++, CMake and [NGL](https://github.com/NCCA/NGL.git) for this program.
-
-Currently using ngl VAO GL_POINTS to create simple particles
-
-The Particle data structure is stored in "Particle.h" as part of a struct. This also contains the default particle attribute declaration.
-
-The Emmiters parameters and functions are stored in "Emmiter.h" as part of a class.
 
 
 
