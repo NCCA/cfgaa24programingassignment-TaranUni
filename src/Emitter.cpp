@@ -58,7 +58,6 @@ ngl::Vec3 Emitter::randomVectorOnSphere()
                      r* cosf(theta));
 }
 
-///*
 void Emitter::render() const
 {
     glPointSize(3);
@@ -84,7 +83,6 @@ void Emitter::render() const
     // Unbind the VAO
     m_vao->unbind();
 }
-//*/
 
 void Emitter::initializeGrid(int sizeX, int sizeY, int sizeZ, float cellSize)
 {
