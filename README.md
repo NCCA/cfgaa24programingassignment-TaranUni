@@ -1,5 +1,7 @@
 # Taran Jones CFGAA Assignment
 
+[This is a video of the program running](https://github.com/NCCA/cfgaa24programingassignment-TaranUni/blob/main/Program%20Footage.mp4)
+
 ## Assignment Ideas
 
 - Flip Fluid Sim
@@ -23,9 +25,9 @@ I will also just stick with showing just the smoke view.~~
 After some thinking and looking through the Euler method, I think I will switch to using the particle based method instead as we have been working on something similar in workshops.
 I have decided to use this video as referance [Sebastian Lague](https://www.youtube.com/watch?v=rSKMYc1CQHE&) on how to create a realistic particle based fluid sim. I think this method will be easier to implement with current code.
 
-I found it hard to use Sebastian Lagues video to implement the optimization step as I found some parts had explanations which made the problem seem more confusing than it was, for instance the collision radius effect 
+I found it hard to use Sebastian Lagues video to implement the optimization step as I found some parts had explanations which made the problem seem more confusing than it was, for instance the collision radius effect was overwhelming to look at and understand, when the effect radius of every particle is shown at once, instead of 2 or a few of them.
 
-**https://github.com/NCCA/cfgaa24programingassignment-TaranUni/blob/main/Program%20Footage.mp4**
+To keep the video short I only simulated 5000 particles at once allowing the box to fill quicker, although because of this the start is a bit slow on the FPS because of the way the optimization I implemented works, I found this video by [Pixel Physics](https://www.youtube.com/watch?v=J1thcSAT9Dc&list=PLzLQjQOvhO0bBCWPsERzBpuXG7HboGumv&index=14&) the best at explaining how it works. Essentially though the optimization works by creating a grid in this case 3D and use it as a way to index every particles general position.
 
 ### ~~**Fire VFX** I am now just using the particles for this.~~
 I gave up on the fluid sim due to time constraints and complexity in optimising the code.
