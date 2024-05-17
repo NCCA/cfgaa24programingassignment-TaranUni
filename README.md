@@ -25,7 +25,7 @@ To build use
 
 and to run use 
 
-    ./nglTetris
+    ./cfgaa24programingassignment
     
 ## Controls
 
